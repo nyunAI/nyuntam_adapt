@@ -1,0 +1,89 @@
+TASK: 'text_generation'
+packing : True
+dataset_text_field : 'text'  #The name of the new field that is created after data loading
+max_seq_length : 512
+flash_attention2 : False
+blocksize : 128
+cuda_id : "0"
+OUTPUT_DIR : './abc/models'                   #This folder needs to be created i n the yaml_json
+OVERWRITE_OUTPUT_DIR : False
+LOGGING_PATH: 'test_log'
+
+DATASET : #"mlabonne/guanaco-llama2-1k"
+DATA_VERSION : '1.0'
+DATA_SPLIT : 0.2
+TRAIN_DIR : ''
+VAL_DIR : ''
+TEST_DIR : ''
+MAX_TRAIN_SAMPLES : 
+MAX_EVAL_SAMPLES : 
+CUSTOM_DATASET_PATH : #"abc/datasets/"
+DATASET_CONFIG : {}
+DATASET_FORMAT :  # 
+FORMAT_NAMES: #'text'  #Which columns are going to be used in the dataset (should be separated by ',')
+FORMAT_STRING:  #The string according to which the dataset will be formatted
+
+MODEL : #"Llama-2"
+MODEL_PATH : #'NousResearch/Llama-2-7b-hf'
+# MODEL : 'BART'
+# MODEL_PATH : 'facebook/bart-base'
+MODEL_VERSION : '1.0'
+CACHE_BOOL : False
+MODEL_CHECKPOINT : ''
+LOCAL_MODEL_PATH :      # pass the local model path 
+
+SEED : 56
+DO_TRAIN : True
+DO_EVAL : False
+NUM_WORKERS : 4
+BATCH_SIZE : 4
+EPOCHS : 1
+STEPS : 100
+OPTIMIZER : 'paged_adamw_32bit'
+LR : 0.0002
+SCHEDULER_TYPE : 'constant'
+WEIGHT_DECAY : 0.001
+BETA1 : 0.9
+BETA2 : 0.999
+ADAM_EPS : 1e-8              # In decimal format
+INTERVAL : 'steps'
+INTERVAL_STEPS : 50
+NO_OF_CHECKPOINTS : 5
+FP16 : True
+RESUME_FROM_CHECKPOINT : False
+GRADIENT_ACCUMULATION_STEPS : 1
+GRADIENT_CHECKPOINTING : True
+GROUP_BY_LENGTH : True
+REMOVE_UNUSED_COLUMNS : True
+
+LAST_LAYER_TUNING : False
+FULL_FINE_TUNING :  False
+
+PEFT_METHOD : #'LoRA'
+
+r : 2
+alpha : 16
+dropout : 0.1
+peft_type : #'LoRA'
+target_modules :    # to check for embedding layer ['embed_tokens'] 
+fan_in_fan_out : False
+init_lora_weights : True  
+
+ 
+load_in_4bit : False
+bnb_4bit_compute_dtype : "float16"
+bnb_4bit_quant_type : "nf4"
+bnb_4bit_use_double_quant : False 
+
+load_in_8bit : False  # only if model weights are in float16 or bfloat16
+llm_int8_threshold : 6.0
+llm_int8_skip_modules : 
+llm_int8_enable_fp32_cpu_offload : False
+llm_int8_has_fp16_weight : False
+SAVE_METHOD : 'state_dict'
+
+
+#DDP ARGS
+DDP: False
+num_nodes: 1
+FSDP: False

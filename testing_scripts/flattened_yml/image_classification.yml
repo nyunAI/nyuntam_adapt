@@ -1,0 +1,113 @@
+TASK: 'image_classification'
+cuda_id : '0'
+OUTPUT_DIR : './abc/models'                                  #This folder needs to be created i n the yaml_json
+OVERWRITE_OUTPUT_DIR : False
+LOGGING_PATH: 'img_clf_log'
+dataset_text_field : 'image'  #The name of the new field that is created after data loading
+flash_attention2 : False
+
+DATASET : 
+DATA_VERSION : '1.0'
+DATA_SPLIT : 0.2
+TRAIN_DIR : ''
+VAL_DIR : ''
+TEST_DIR : ''
+MAX_TRAIN_SAMPLES : 
+MAX_EVAL_SAMPLES : 
+CUSTOM_DATASET_PATH : #"../CIFAR10/cifar10/cifar10"
+DATASET_CONFIG : {}
+FORMAT_NAMES: #'image'  #Which columns are going to be used in the dataset (should be separated by ',')
+FORMAT_STRING:  #The string according to which the dataset will be formatted
+
+
+FRAMEWORK : "Huggingface"     #Framework can be "Timm/Huggingface"
+IMAGE_PROCESSOR_PATH : #'facebook/convnext-tiny-224'
+MODEL_TYPE : #'densenet_timm'
+MODEL : #"ViT"  #densenet121 #"ViT"
+MODEL_PATH : #"google/vit-base-patch16-224-in21k"    #densenet121          #'facebook/convnext-tiny-224'
+MODEL_VERSION : '1.0'
+CACHE_BOOL : False
+MODEL_CHECKPOINT : ''
+
+
+SEED : 56
+DO_TRAIN : True
+DO_EVAL : True
+NUM_WORKERS : 4
+BATCH_SIZE : 16
+EPOCHS : 1
+STEPS : 100
+OPTIMIZER : 'sgd'
+LR : 1e-5
+SCHEDULER_TYPE : 'linear'
+WEIGHT_DECAY : 0.0
+BETA1 : 0.9
+BETA2 : 0.999
+ADAM_EPS : 1e-8 
+INTERVAL : 'steps'
+INTERVAL_STEPS : 50
+NO_OF_CHECKPOINTS : 5
+FP16 : False
+RESUME_FROM_CHECKPOINT : False
+GRADIENT_ACCUMULATION_STEPS : 1
+GRADIENT_CHECKPOINTING : False
+REMOVE_UNUSED_COLUMNS : False
+
+
+LAST_LAYER_TUNING : False
+FULL_FINE_TUNING : False
+
+PEFT_METHOD : 
+
+
+r : 8
+alpha : 1.0
+dropout : 0.1
+peft_type : #'LoRA' #DoRA #SSF
+target_modules : 
+fan_in_fan_out : False
+init_lora_weights : True  
+
+# DoRA_CONFIG :
+#   r : 16
+#   alpha : 8
+#   dropout : 0.1
+#   peft_type : 'DoRA'
+#   target_modules : 
+#   fan_in_fan_out : False
+
+# SSF_CONFIG :
+#   peft_type : 'SSF'
+
+
+
+load_model : True
+model_path : densenet121
+model_type : 'densenet_timm'
+image_processor_path : 'facebook/convnext-tiny-224'
+
+
+
+load_in_4bit : False
+bnb_4bit_compute_dtype : "float16"
+bnb_4bit_quant_type : "nf4"
+bnb_4bit_use_double_quant : False 
+
+
+load_in_8bit : False  # only if model weights are in float16 or bfloat16
+llm_int8_threshold : 6.0
+llm_int8_skip_modules : 
+llm_int8_enable_fp32_cpu_offload : False
+llm_int8_has_fp16_weight : False
+
+SAVE_METHOD : 'state_dict'
+
+
+#DDP ARGS
+DDP: False
+num_nodes: 1
+FSDP: False
+
+
+
+
