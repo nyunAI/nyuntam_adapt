@@ -1,6 +1,6 @@
+# from __future__ import annotations
 from dataclasses import dataclass, field, asdict, fields, is_dataclass, MISSING
 from typing import Dict, Union, Optional, Literal
-from __future__ import annotations
 
 @dataclass
 class BNBConfigUse4Bit:
