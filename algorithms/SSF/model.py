@@ -5,11 +5,11 @@ import gc
 import logging
 from dataclasses import dataclass
 from .layer import Conv2d, Linear, SSFLayer, LayerNorm, BatchNorm2d
-from algorithms.base_algorithm import BaseAlgorithm
-from algorithms.utils import is_bnb_4bit_available, is_bnb_available
+from nyuntam_adapt.algorithms.base_algorithm import BaseAlgorithm
+from nyuntam_adapt.algorithms.utils import is_bnb_4bit_available, is_bnb_available
 from timm.layers import norm
-from tasks.timm_image_classification import TimmforImageClassification
-from algorithms.utils import (
+from nyuntam_adapt.tasks.timm_image_classification import TimmforImageClassification
+from nyuntam_adapt.algorithms.utils import (
     _get_submodules,
 )
 

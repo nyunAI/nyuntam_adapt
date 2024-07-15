@@ -9,10 +9,12 @@ import subprocess
 import yaml
 import copy
 import json
-
+from pathlib import Path
 # NOTE - Uncomment line 10, Comment line 10 for production.
 # sys.path.append("/workspace/Adapt")
-sys.path.append("/wspace/Adapt")
+# sys.path.append("/wspace/Adapt")
+This = Path(__file__)
+sys.path.append(This.parent.parent)
 import argparse
 import yaml
 from yaml_json_flattened import execute_yaml_creation

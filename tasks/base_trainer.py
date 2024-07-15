@@ -4,23 +4,22 @@ import warnings
 import warnings
 from transformers import TrainingArguments
 from datasets import load_dataset
-from algorithms.base_algorithm import BaseAlgorithm, get_peft_state_dict
-from .utils import PEFT_TYPE_TO_MODEL_MAPPING, PEFT_TYPE_TO_CONFIG_MAPPING
+from nyuntam_adapt.algorithms.base_algorithm import BaseAlgorithm, get_peft_state_dict
+from nyuntam_adapt.tasks.utils import PEFT_TYPE_TO_MODEL_MAPPING, PEFT_TYPE_TO_CONFIG_MAPPING
 from abc import abstractmethod
-from Trainers import AdaptTrainer, AdaptSeq2SeqTrainer, AdaptSFTTrainer
+from nyuntam_adapt.Trainers import AdaptTrainer, AdaptSeq2SeqTrainer, AdaptSFTTrainer
 import logging
 import sys
 from glob import glob
 
 sys.path.append("/workspace/Adapt")
 
-sys.path.append("/workspace/Adapt/logging_adapt")
-from logging_adapt import define_logger
-from dataset import Dataset
+# sys.path.append("/workspace/Adapt/logging_adapt")
+from nyuntam_adapt.logging_adapt import define_logger
+from nyuntam_adapt.dataset import Dataset
 from pathlib import Path
 from safetensors.torch import save_model
 from safetensors import safe_open
-from utils import CudaDeviceEnviron
 import shutil
 
 # torch.set_default_dtype(torch.float32)

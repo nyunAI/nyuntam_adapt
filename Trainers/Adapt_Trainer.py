@@ -44,8 +44,8 @@ from transformers.trainer_utils import (
 
 from transformers.trainer_pt_utils import LabelSmoother
 
-sys.path.append("/workspace/Adapt/logging_adapt")
-from logging_adapt import define_logger
+# sys.path.append("/workspace/Adapt/logging_adapt")
+from nyuntam_adapt.logging_adapt import define_logger
 
 from transformers.utils import (
     # logging,
@@ -58,7 +58,7 @@ from transformers.utils import (
     is_safetensors_available,
 )
 from transformers.utils.quantization_config import QuantizationMethod
-from algorithms.base_algorithm import get_peft_state_dict
+from nyuntam_adapt.algorithms.base_algorithm import get_peft_state_dict
 from safetensors.torch import save_file as safe_save_file
 
 

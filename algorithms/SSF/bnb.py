@@ -3,7 +3,7 @@ import math
 import bitsandbytes as bnb
 import torch
 import torch.nn as nn
-from algorithms.utils import (
+from nyuntam_adapt.algorithms.utils import (
     Transpose,
     is_bnb_4bit_available,
     is_bnb_available,

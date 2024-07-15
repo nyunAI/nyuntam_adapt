@@ -2,17 +2,17 @@ import torch
 import torch.nn as nn
 from typing import Any, Mapping, Optional, Tuple, List
 from collections import deque
-from .utils import _get_submodules
+from nyuntam_adapt.algorithms.utils import _get_submodules
 from abc import abstractmethod
-from tasks.timm_image_classification import TimmforImageClassification
+from nyuntam_adapt.tasks.timm_image_classification import TimmforImageClassification
 import logging
 import bitsandbytes as bnb
 from functools import reduce
 from peft.tuners.tuners_utils import BaseTuner
 import sys
 
-sys.path.append("/workspace/Adapt/logging_adapt")
-from logging_adapt import define_logger
+# sys.path.append("/workspace/Adapt/logging_adapt")
+from nyuntam_adapt.logging_adapt import define_logger
 
 # logger = logging.getLogger(__name__)
 

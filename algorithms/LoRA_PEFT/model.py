@@ -24,7 +24,7 @@ from functools import partial, reduce
 from itertools import chain
 from typing import Literal, Optional
 from dataclasses import dataclass
-from algorithms.base_algorithm import BaseAlgorithm
+from nyuntam_adapt.algorithms.base_algorithm import BaseAlgorithm
 
 
 import torch

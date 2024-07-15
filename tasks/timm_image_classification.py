@@ -4,7 +4,7 @@ import torch.nn as nn
 from typing import Optional
 import torch.nn.functional as F
 from transformers.modeling_outputs import ImageClassifierOutputWithNoAttention
-from models import internimage  # TO register model and config
+from nyuntam_adapt.models import internimage  # TO register model and config
 
 
 class TimmforImageClassification(nn.Module):
