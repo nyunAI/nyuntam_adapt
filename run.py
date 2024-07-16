@@ -40,14 +40,17 @@ else:
     input_mode.yaml_path = remove_adapt_prefix(input_mode.yaml_path)
     file = input_mode.yaml_path
 
-
 from dataclasses import asdict
-from logging_adapt import define_logger
-import logging
 
 
 with open(file, "r") as f:
     args = yaml.safe_load(f)
+
+from logging_adapt import define_logger
+import logging
+
+logging_path=args['LOGGING_PATH']
+os.makedirs(logging_path, exist_ok=True)
 
 
 # cuda_env = CudaDeviceEnviron(cuda_device_ids_str=args["cuda_id"])

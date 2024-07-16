@@ -19,8 +19,6 @@ class LogFile(object):
             handler.flush()
 
 def define_logger(name, logging_path):
-
-    os.makedirs(f"{logging_path}", exist_ok=True)
     logger = logging.getLogger(name)
 
     logging.basicConfig(
