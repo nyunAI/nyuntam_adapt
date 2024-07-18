@@ -228,7 +228,7 @@ iv. num_machines NUM_MACHINES (int) — The total number of machines used in thi
 Further information about the FSDP parameters can be found [here](https://huggingface.co/docs/accelerate/en/package_reference/cli)
 
 
-<span style="color:red">**NOTE**</span> : FURTHER INFORMATION ABOUT THE YAML FILES CAN BE FOUND IN OUT [OFFICIAL DOCUMENTATION](https://nyunai.github.io/nyun-docs/)
+<span style="color:red">**NOTE**</span> : FURTHER INFORMATION ABOUT THE YAML FILES CAN BE FOUND IN OUR[OFFICIAL DOCUMENTATION](https://nyunai.github.io/nyun-docs/)
 
 
 ### Run command
