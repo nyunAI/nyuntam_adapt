@@ -195,7 +195,8 @@ FSDP: False
 To train the model using [Full Sharded Data Parallel](https://pytorch.org/tutorials/intermediate/FSDP_tutorial.html), FSDP parameter has to be set to True. The FSDP arguments are mentioned in accelerate_config.yaml. 
 
 ```yaml
-compute_environment:LOCAL_MACHINE                             debug: true                        
+compute_environment: LOCAL_MACHINE                             
+debug: true                        
 distributed_type: FSDP
 downcast_bf16: 'no'
 enable_cpu_affinity: false
