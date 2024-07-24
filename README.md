@@ -72,14 +72,15 @@ DATASET_TYPE: LLM - Openhermes
 DATASET_CONFIG : {}
 CUSTOM_DATASET_PATH :
 ```
+<ol>
+<li> "DATASET" refers to the name of the dataset as can be found on the hugginface hub. eg - 'mlabonne/guanaco-llama2-1k'.</li>
 
-i. "DATASET" refers to the name of the dataset as can be found on the hugginface hub. eg - 'mlabonne/guanaco-llama2-1k'.
+<li> The "DATASET_TYPE" refers to the user given name for the dataset. </li>
 
-ii. The "DATASET_TYPE" refers to the user given name for the dataset. 
+<li> Some datasets like opus-books have subsets like - "en-fr". These are used while downloading the dataset and can be mentioned in "DATASET_CONFIG". </li>
 
-iii. Some datasets like opus-books have subsets like - "en-fr". These are used while downloading the dataset and can be mentioned in "DATASET_CONFIG". 
-
-iv. "CUSTOM_DATASET_PATH" refers to the dataset path is user has a custom dataset that is not on huggingface hub. 
+<li> "CUSTOM_DATASET_PATH" refers to the dataset path is user has a custom dataset that is not on huggingface hub. </li>
+</ol>
 
 Further information about using custom datasets can be found [here](https://nyunai.github.io/nyun-docs/dataset/)
 
@@ -91,14 +92,16 @@ MODEL: Llama-3
 MODEL_PATH: meta-llama/Meta-Llama-3-70B
 LOCAL_MODEL_PATH : 
 ```
+<ol>
+<li> "Library" is self explanatory and refers to the library which is used for the model. for all the language tasks, Adapt supports Huggingface and Timm and Huggingface are supported for vision tasks. </li>
 
-i. "Library" is self explanatory and refers to the library which is used for the model. for all the language tasks, Adapt supports Huggingface and Timm and Huggingface are supported for vision tasks. 
+<li> "MODEL" refers to the user given name of the model and can be chosen by the user. this DOES NOT refer to the model details. </li>
 
-ii. "MODEL" refers to the user given name of the model and can be chosen by the user. this DOES NOT refer to the model details.
+<li> "MODEL_PATH" refers to the huggingface model id and needs to be the same as that in the HF hub. </li>
 
-iii. "MODEL_PATH" refers to the huggingface model id and needs to be the same as that in the HF hub. 
+<li> "LOCAL_MODEL_PATH" refers to the path of the model weights if the user has custom model weights. </li>
 
-iv. "LOCAL_MODEL_PATH" refers to the path of the model weights if the user has custom model weights.
+</ol>
 
 Further information about using custom model weights can be found [here](https://nyunai.github.io/nyun-docs/model/#using-model-relative-folder-path)
 - ***Training Arguments***
@@ -137,10 +140,11 @@ The training arguments can be changed to alter the training parameters like lear
 LAST_LAYER_TUNING : False
 FULL_FINE_TUNING :  False
 ```
+<ol>
+<li> "LAST_LAYER_TUNING" should be set to True when only the last layer is to be fine tuned of the model. When PEFT methods are used, LAST_LAYER_TUNING ensures that the layers that are to be finetuned are the PEFT modules and the last layer of the network. </li>
 
-i. "LAST_LAYER_TUNING" should be set to True when only the last layer is to be fine tuned of the model. When PEFT methods are used, LAST_LAYER_TUNING ensures that the layers that are to be finetuned are the PEFT modules and the last layer of the network. 
-
-ii. "FULL_FINE_TUNING" should be set to True when the all the layers of the model weights are to be finetuned. This utilises lot of computational resources. 
+<li> "FULL_FINE_TUNING" should be set to True when the all the layers of the model weights are to be finetuned. This utilises lot of computational resources. </li>
+</ol>
 
 - ***PEFT arguments***
 ```yaml 
@@ -153,12 +157,13 @@ target_modules :
 fan_in_fan_out : False
 init_lora_weights : True  
 ```
+<ol>
+<li> "PEFT_METHOD" and "peft_type" refers to the type of PEFT method used to create the adapters. Currently supported PEFT methods are -  "LoRA", "DoRA" or "SSF". </li>
 
-i. "PEFT_METHOD" and "peft_type" refers to the type of PEFT method used to create the adapters. Currently supported PEFT methods are -  "LoRA", "DoRA" or "SSF". 
+<li> "r" and "alpha" are parameters for LoRA and DoRA and theyr details can be found here : [LoRA/DoRA](https://arxiv.org/pdf/2106.09685). </li>
 
-ii. "r" and "alpha" are parameters for LoRA and DoRA and theyr details can be found here : [LoRA/DoRA](https://arxiv.org/pdf/2106.09685).
-
-iii. "target_modules" are the layers where LoRA adapters are to be added. By default they will be added to every Linear/Conv2D layers in the model. 
+<li> "target_modules" are the layers where LoRA adapters are to be added. By default they will be added to every Linear/Conv2D layers in the model. </li>
+</ol>
 
 
 - ***Quantization arguments***
@@ -174,10 +179,11 @@ llm_int8_skip_modules :
 llm_int8_enable_fp32_cpu_offload : False
 llm_int8_has_fp16_weight : False
 ```
+<ol>
+<li> "load_in_4bit" should be set to True is the model is to be loaded in 4bit and simillarly "load_in_8bit" should be set to True if the model is to be loaded in 8bit. </li>
 
-i. "load_in_4bit" should be set to True is the model is to be loaded in 4bit and simillarly "load_in_8bit" should be set to True if the model is to be loaded in 8bit. 
-
-ii. Details of the other parameteres can be found here : [bitsandbytes](https://huggingface.co/docs/bitsandbytes/main/en/index)
+<li> Details of the other parameteres can be found here : [bitsandbytes](https://huggingface.co/docs/bitsandbytes/main/en/index)</li>
+</ol>
 
 - ***Distributed Training Arguments***
 ```yaml 
@@ -189,7 +195,7 @@ FSDP: False
 To train the model using [Full Sharded Data Parallel](https://pytorch.org/tutorials/intermediate/FSDP_tutorial.html), FSDP parameter has to be set to True. The FSDP arguments are mentioned in accelerate_config.yaml. 
 
 ```yaml
-compute_environment:LOCAL_MACHINE                                          debug: true                        
+compute_environment:LOCAL_MACHINE                             debug: true                        
 distributed_type: FSDP
 downcast_bf16: 'no'
 enable_cpu_affinity: false
@@ -216,19 +222,20 @@ tpu_use_cluster: false
 tpu_use_sudo: false
 use_cpu: false
 ```
+<ol>
+<li> "distributed_type" should be set to FSDP to ensure that model being trained on multiple GPUs (if they are available)</li>
 
-i. "distributed_type" should be set to FSDP to ensure that model being trained on multiple GPUs (if they are available)
+<li> "fsdp_sharding_strategy" refers to the sharding strategy to be used while training the model. If "NO_SHARD" is selected, then it behaves like  [Distributed Data Parallel](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)</li>
 
-ii. "fsdp_sharding_strategy" refers to the sharding strategy to be used while training the model. If "NO_SHARD" is selected, then it behaves like  [Distributed Data Parallel](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)
+<li> num_processes NUM_PROCESSES (int) — The total number of processes to be launched in parallel.</li>
 
-iii. num_processes NUM_PROCESSES (int) — The total number of processes to be launched in parallel.
-
-iv. num_machines NUM_MACHINES (int) — The total number of machines used in this training.
+<li> num_machines NUM_MACHINES (int) — The total number of machines used in this training.</li>
+</ol>
 
 Further information about the FSDP parameters can be found [here](https://huggingface.co/docs/accelerate/en/package_reference/cli)
 
 
-<span style="color:red">**NOTE**</span> : FURTHER INFORMATION ABOUT THE YAML FILES CAN BE FOUND IN OUR[OFFICIAL DOCUMENTATION](https://nyunai.github.io/nyun-docs/)
+<span style="color:red">**NOTE**</span> : FURTHER INFORMATION ABOUT THE YAML FILES CAN BE FOUND IN OUR [OFFICIAL DOCUMENTATION](https://nyunai.github.io/nyun-docs/)
 
 
 ### Run command
