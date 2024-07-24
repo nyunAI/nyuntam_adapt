@@ -219,11 +219,11 @@ class QuestionAnswering(BaseTrainer):
                         )
                 else:
                     model = AutoModelForQuestionAnswering.from_pretrained(
-                            self.model_path,
-                            use_flash_attention_2=self.flash_attention,
-                            # device_map = "auto",
-                            **self.model_args,
-                        )
+                        self.model_path,
+                        use_flash_attention_2=self.flash_attention,
+                        # device_map = "auto",
+                        **self.model_args,
+                    )
             except Exception as e:
                 raise ModelLoadingError(f"Following Error Happened : {e}") from e
 

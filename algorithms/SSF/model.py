@@ -32,7 +32,14 @@ class SSFConfig:
 
 
 class SSFModel(BaseAlgorithm):
-    def __init__(self, model, peft_config, adapter_name = None, model_type=None, auto_select_modules=True):
+    def __init__(
+        self,
+        model,
+        peft_config,
+        adapter_name=None,
+        model_type=None,
+        auto_select_modules=True,
+    ):
         super().__init__(model, peft_config)
         self.auto_select_modules = auto_select_modules
         if self.peft_config.target_modules is None:

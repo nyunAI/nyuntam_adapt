@@ -1,19 +1,12 @@
-# NOTE - This main file should be outside the Adapt folder while testing/ running
-# this is because it is outside the Adapt folder in production
-# and is written with to follow paths accordingly.
-
-
 import os
 import sys
 
-# NOTE - Uncomment line 10, Comment line 10 for production.
 # sys.path.append("/workspace/Adapt")
 sys.path.append("/wspace/Adapt")
 import argparse
 import yaml
 from yaml_json_flattened import execute_yaml_creation
 
-# os.chdir("../Adapt")
 
 from utils import ErrorMessageHandler
 
@@ -49,18 +42,13 @@ with open(file, "r") as f:
 from logging_adapt import define_logger
 import logging
 
-logging_path=args['LOGGING_PATH']
+logging_path = args["LOGGING_PATH"]
 os.makedirs(logging_path, exist_ok=True)
 
-
-# cuda_env = CudaDeviceEnviron(cuda_device_ids_str=args["cuda_id"])
 
 from tasks import AdaptParams, create_instance
 
 adapt_params = create_instance(AdaptParams, args)
-
-
-# os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, args["cuda_id"]))
 
 
 try:

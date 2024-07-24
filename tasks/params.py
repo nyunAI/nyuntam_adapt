@@ -1,6 +1,6 @@
-# from __future__ import annotations
 from dataclasses import dataclass, field, asdict, fields, is_dataclass, MISSING
 from typing import Dict, Union, Optional, Literal
+
 
 @dataclass
 class BNBConfigUse4Bit:
@@ -72,6 +72,7 @@ class DoRA_PEFT:
     # Enables replicating layers in a model to expand it to a larger model.
     layer_replication: Optional[list[tuple[int, int]]] = field(default=None)
     peft_type: str = "DoRA"
+
 
 @dataclass
 class SSFConfig:
@@ -188,11 +189,12 @@ class AdaptParams:
     doc_stride: int = 128
     max_length: int = 384
     Library: str = "Huggingface"
-    #DDP args
-    DDP:bool = False
-    num_nodes:int = 1
-    #FSDP args 
-    FSDP:bool = False
+    # DDP args
+    DDP: bool = False
+    num_nodes: int = 1
+    # FSDP args
+    FSDP: bool = False
+
 
 def create_instance(data_class, flat_dict):
     instance_args = {}

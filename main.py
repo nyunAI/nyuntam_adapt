@@ -1,8 +1,3 @@
-# NOTE - This main file should be outside the Adapt folder while testing/ running
-# this is because it is outside the Adapt folder in production
-# and is written with to follow paths accordingly.
-
-
 import os
 import sys
 import subprocess
@@ -10,25 +5,19 @@ import yaml
 import copy
 import json
 
-# NOTE - Uncomment line 10, Comment line 10 for production.
 # sys.path.append("/workspace/Adapt")
 sys.path.append("/wspace/Adapt")
 import argparse
 import yaml
 from yaml_json_flattened import execute_yaml_creation
 
-#os.chdir("./Adapt")
 
 from utils import ErrorMessageHandler
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--yaml_path", default="", type=str)
 parser.add_argument("--json_path", default="", type=str)
-# parser.add_argument("--local-rank", type=int, default=0)
 input_mode = parser.parse_args()
-
-# if "LOCAL_RANK" not in os.environ:
-#     os.environ["LOCAL_RANK"] = str(input_mode.local_rank)
 
 
 # Removing /Adapt from the given path
@@ -57,14 +46,10 @@ with open(file, "r") as f:
     args = yaml.safe_load(f)
 
 
-# cuda_env = CudaDeviceEnviron(cuda_device_ids_str=args["cuda_id"])
-
 from tasks import AdaptParams, create_instance
 
 adapt_params = create_instance(AdaptParams, args)
 
-
-# os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, args["cuda_id"]))
 
 if args["DDP"]:
     # Subprocess to call torchrun for DDP training
@@ -90,8 +75,10 @@ elif args["FSDP"]:
     if input_mode.json_path:
         acc_json_file = open(input_mode.json_path)
         acc_json = json.load(acc_json_file)
-        job_id = acc_json['id']
-        final_accelerate_config = f"/workspace/Adapt/user_data/jobs/Adapt/{job_id}/accelerate_config.yaml"
+        job_id = acc_json["id"]
+        final_accelerate_config = (
+            f"/workspace/Adapt/user_data/jobs/Adapt/{job_id}/accelerate_config.yaml"
+        )
         acc_json = acc_json["method_hyperparameters"]
         for args in accelerate_config:
             if args in list(acc_json.keys()):

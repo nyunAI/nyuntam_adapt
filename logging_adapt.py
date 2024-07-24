@@ -18,6 +18,7 @@ class LogFile(object):
         for handler in self.logger.handlers:
             handler.flush()
 
+
 def define_logger(name, logging_path):
     logger = logging.getLogger(name)
 

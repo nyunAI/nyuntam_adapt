@@ -9,8 +9,8 @@ class AdaptSFTTrainer(SFTTrainer, AdaptTrainer):
         self.flash_attention = kwargs.pop("flash_attn")
         self.block_size = kwargs.pop("block_size")
         super().__init__(**kwargs)
-        
-    def _save(self, output_dir= None, state_dict=None):
+
+    def _save(self, output_dir=None, state_dict=None):
         super()._save(output_dir, state_dict)
 
     def log(self, logs: Dict[str, float]) -> None:
@@ -35,8 +35,14 @@ class AdaptSFTTrainer(SFTTrainer, AdaptTrainer):
         return result
 
     def _prepare_non_packed_dataloader(
-        self, tokenizer, dataset, dataset_text_field, max_seq_len, formatting_func=None, remove_unused_columns=True,add_special_tokens=True
-
+        self,
+        tokenizer,
+        dataset,
+        dataset_text_field,
+        max_seq_len,
+        formatting_func=None,
+        remove_unused_columns=True,
+        add_special_tokens=True,
     ):
         use_formatting_func = formatting_func is not None and dataset_text_field is None
         self._dataset_sanity_checked = False
@@ -44,9 +50,11 @@ class AdaptSFTTrainer(SFTTrainer, AdaptTrainer):
         # Inspired from: https://huggingface.co/learn/nlp-course/chapter7/6?fw=pt
         def tokenize(element):
             outputs = tokenizer(
-                element[dataset_text_field]
-                if not use_formatting_func
-                else formatting_func(element),
+                (
+                    element[dataset_text_field]
+                    if not use_formatting_func
+                    else formatting_func(element)
+                ),
                 truncation=True,
                 padding=False,
                 max_length=max_seq_len,
@@ -74,7 +82,6 @@ class AdaptSFTTrainer(SFTTrainer, AdaptTrainer):
             num_proc=self.dataset_num_proc,
             batch_size=self.dataset_batch_size,
         )
-
 
         if self.flash_attention:
             tokenized_dataset = tokenized_dataset.map(

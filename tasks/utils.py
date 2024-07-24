@@ -29,8 +29,6 @@ PEFT_TYPE_TO_CONFIG_MAPPING = {
 }
 
 
-
-
 class TimmModelConfig(PretrainedConfig):
     def __init__(self, model_type, **kwargs):
         super().__init__(**kwargs)
@@ -130,7 +128,6 @@ def load_model_from_checkpoint(checkpoint_path, flash_attention, quantization_co
 
     if use_flash_attention_2:
         warnings.warn("Flash attention 2 is not supported for current architecture")
-        # config = cls._check_and_enable_flash_attn_2(config, torch_dtype=model_orig.dtype)
 
     with ContextManagers(init_contexts):
         model2 = cls(config, *model_args, **model_kwargs)
@@ -193,8 +190,6 @@ def load_model_from_checkpoint(checkpoint_path, flash_attention, quantization_co
         # First part of the test is always true as load_state_dict_keys always contains state_dict keys.
         param_name = keys_list[index]
         param = values_list[index]
-        # if param_name not in loaded_state_dict_keys or param_name not in expected_keys:
-        #     continue
 
         if param_name.startswith(start_prefix):
             param_name = param_name[len(start_prefix) :]
@@ -292,13 +287,6 @@ def prepare_model_for_kbit_training(model, use_gradient_checkpointing=True):
     loaded_in_kbit = getattr(model, "is_loaded_in_8bit", False) or getattr(
         model, "is_loaded_in_4bit", False
     )
-    # is_gptq_quantized = getattr(model, "quantization_method", None) == "gptq"
-    # for name, param in model.named_parameters():
-    #     # freeze base model's layers
-    #     param.requires_grad = False
-
-    # if not is_gptq_quantized:
-    # cast all non INT8 parameters to fp32
     for param in model.parameters():
         if (param.dtype == torch.float16) or (param.dtype == torch.bfloat16):
             param.data = param.data.to(torch.float32)
