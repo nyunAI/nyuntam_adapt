@@ -4,10 +4,6 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 
-# from transformers.models.llama import modeling_llama as llama
-
-# from transformers.models.llama import modeling_llama as llama
-
 
 class SSFLayer:
     def __init__(self, dim, dtype=torch.float32) -> None:

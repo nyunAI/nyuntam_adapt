@@ -123,7 +123,6 @@ class BaseTrainer(object):
         self.beta1 = float(kwargs["TRAINING_ARGS"].get("BETA1", 0.9))
         self.beta2 = float(kwargs["TRAINING_ARGS"].get("BETA2", 0.999))
 
-
         self.warmup = kwargs["TRAINING_ARGS"].get("WARMUP") or True
         self.warmup_iters = kwargs["TRAINING_ARGS"].get("WARMUP_ITERS") or 50
         self.warmup_ratio = kwargs["TRAINING_ARGS"].get("WARMUP_RATIO") or 0.1

@@ -1,17 +1,3 @@
-# Copyright 2023-present the HuggingFace Inc. team.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import importlib
 import warnings
 from typing import Any, Optional
@@ -51,7 +37,9 @@ class LoraParallelLinear(nn.Module, LoraLayer):
         LoraLayer.__init__(self, base_layer=base_layer)
 
         if use_dora:
-            raise ValueError(f"{self.__class__.__name__} does not support DoRA yet, please set it to False")
+            raise ValueError(
+                f"{self.__class__.__name__} does not support DoRA yet, please set it to False"
+            )
 
         self.backend = backend
         self.is_parallel_a = isinstance(base_layer, backend.RowParallelLinear)
@@ -100,7 +88,9 @@ class LoraParallelLinear(nn.Module, LoraLayer):
         **parallel_linear_kwargs,
     ):
         if r <= 0:
-            raise ValueError(f"`r` should be a positive integer value but the value passed is {r}")
+            raise ValueError(
+                f"`r` should be a positive integer value but the value passed is {r}"
+            )
         self.r[adapter_name] = r
         self.lora_alpha[adapter_name] = lora_alpha
         if lora_dropout > 0.0:
@@ -123,9 +113,19 @@ class LoraParallelLinear(nn.Module, LoraLayer):
                 init_method=init_method,
                 config=megatron_config,
             )
-            lora_b = nn.Linear(in_features=r, out_features=self.out_features, bias=False, dtype=torch.float32)
+            lora_b = nn.Linear(
+                in_features=r,
+                out_features=self.out_features,
+                bias=False,
+                dtype=torch.float32,
+            )
         else:
-            lora_a = nn.Linear(in_features=self.in_features, out_features=r, bias=False, dtype=torch.float32)
+            lora_a = nn.Linear(
+                in_features=self.in_features,
+                out_features=r,
+                bias=False,
+                dtype=torch.float32,
+            )
             lora_b = self.backend.ColumnParallelLinear(
                 input_size=r,
                 output_size=self.out_features,
@@ -208,12 +208,17 @@ def dispatch_megatron(
 
     if megatron_core and isinstance(
         target_base_layer,
-        (megatron_core.tensor_parallel.ColumnParallelLinear, megatron_core.tensor_parallel.RowParallelLinear),
+        (
+            megatron_core.tensor_parallel.ColumnParallelLinear,
+            megatron_core.tensor_parallel.RowParallelLinear,
+        ),
     ):
         megatron_kwargs = kwargs.copy()
         megatron_config = lora_config.megatron_config
         if isinstance(megatron_config, dict):
-            transformer_config_class = megatron_core.transformer.transformer_config.TransformerConfig
+            transformer_config_class = (
+                megatron_core.transformer.transformer_config.TransformerConfig
+            )
             megatron_config = transformer_config_class(**lora_config.megatron_config)
         megatron_kwargs["megatron_config"] = megatron_config
         if megatron_kwargs["fan_in_fan_out"]:
@@ -224,7 +229,10 @@ def dispatch_megatron(
             )
             megatron_kwargs["fan_in_fan_out"] = lora_config.fan_in_fan_out = False
         new_module = LoraParallelLinear(
-            base_layer=target, adapter_name=adapter_name, backend=megatron_core.tensor_parallel, **megatron_kwargs
+            base_layer=target,
+            adapter_name=adapter_name,
+            backend=megatron_core.tensor_parallel,
+            **megatron_kwargs,
         )
 
     return new_module

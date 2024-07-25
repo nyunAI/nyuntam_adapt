@@ -1,16 +1,3 @@
-# Copyright 2023-present the HuggingFace Inc. team.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 from __future__ import annotations
 
 import math
@@ -54,13 +41,7 @@ from peft.utils.merge_utils import (
     ties,
 )
 
-# from .aqlm import dispatch_aqlm
-# from .awq import dispatch_awq
 from .config import LoraConfig_PEFT
-
-# from .eetq import dispatch_eetq
-# from .gptq import dispatch_gptq
-# from .hqq import dispatch_hqq
 from .layer import Conv2d, LoraLayer, dispatch_default
 from .tp_layer import dispatch_megatron
 
@@ -69,17 +50,6 @@ def _adapter_names_pre_forward_hook(target, args, kwargs, adapter_names):
     # pre-forward hook to inject the adapter_names argument when using mixed adapter batches inference
     kwargs["adapter_names"] = adapter_names
     return args, kwargs
-
-
-# @dataclass
-# class LoraConfig_PEFT:
-#     r: int = 2
-#     alpha: float = 1.0
-#     dropout: float = 0.0
-#     peft_type: str = "LORA"
-#     target_modules: list = None
-#     fan_in_fan_out: bool = False
-#     init_lora_weights: bool = True
 
 
 class LoraModel_PEFT(BaseAlgorithm):
@@ -159,11 +129,7 @@ class LoraModel_PEFT(BaseAlgorithm):
     def __init__(
         self, model, config, adapter_name, model_type, auto_select_modules
     ) -> None:
-        # super().__init__(model , config , self.adapter_name)
-        # super(BaseTuner , self).__init__(model, config , self.adapter_name)
         super().__init__(model, config)
-        # BaseTuner.__init__(model, config, self.adapter_name)
-        # BaseAlgorithm.__init__(model, config)
 
         self.adapter_name = adapter_name
         self.active_adapter = [self.adapter_name]
@@ -171,16 +137,12 @@ class LoraModel_PEFT(BaseAlgorithm):
         self.peft_config = config
         self.config = config
 
-        # # #if self.peft_config.target_modules is None:
-        # # #if self.auto_select_modules:
         self.peft_config.target_modules = self.select_modules()
         print(
             "Default target modules existing in Model are ",
             self.peft_config.target_modules,
         )
         self.inject_module(model)
-        # base_tuner = BaseTuner(model , config , self.adapter_name)
-        # self.inject_adapter = base_tuner.inject_adapter
 
     def _check_new_adapter_config(self, config: LoraConfig_PEFT) -> None:
         """
@@ -217,18 +179,6 @@ class LoraModel_PEFT(BaseAlgorithm):
     def _create_and_replace(
         self, lora_config, target, target_name, parent, **optional_kwargs
     ):
-        # if current_key is None:
-        #     raise ValueError("Current Key shouldn't be `None`")
-        # Regexp matching - Find key which matches current target_name in patterns provided
-        # pattern_keys = list(
-        #     chain(lora_config.rank_pattern.keys(), lora_config.alpha_pattern.keys())
-        # )
-        # target_name_key = next(
-        #     filter(lambda key: re.match(rf".*\.{key}$", current_key), pattern_keys),
-        #     current_key,
-        # )
-        # r = lora_config.rank_pattern.get(target_name_key, lora_config.r)
-        # alpha = lora_config.alpha_pattern.get(target_name_key, lora_config.lora_alpha)
         r = lora_config.r
         alpha = lora_config.lora_alpha
 
@@ -240,19 +190,10 @@ class LoraModel_PEFT(BaseAlgorithm):
             "init_lora_weights": lora_config.init_lora_weights,
             "use_rslora": lora_config.use_rslora,
             "use_dora": lora_config.use_dora,
-            # "loaded_in_8bit": getattr(self.base_model, "is_loaded_in_8bit", False),
-            # "loaded_in_4bit": getattr(self.base_model, "is_loaded_in_4bit", False),
         }
         kwargs["loaded_in_8bit"] = optional_kwargs.pop("loaded_in_8bit", False)
         kwargs["loaded_in_4bit"] = optional_kwargs.pop("loaded_in_4bit", False)
         quant_methods = ["gptq", "aqlm", "awq"]
-        # for quant_method in quant_methods:
-        #     quantization_config = get_quantization_config(
-        #         self.base_model, method=quant_method
-        #     )
-        #     if quantization_config is not None:
-        #         kwargs[f"{quant_method}_quantization_config"] = quantization_config
-
         # note: AdaLoraLayer is a subclass of LoraLayer, we need to exclude it
         from peft.tuners.adalora import AdaLoraLayer
 
@@ -305,33 +246,6 @@ class LoraModel_PEFT(BaseAlgorithm):
                 )
                 module.to(weight.device)
 
-    # def _mark_only_adapters_as_trainable(self, model: nn.Module) -> None:
-    #     for n, p in model.named_parameters():
-    #         if self.prefix not in n:
-    #             p.requires_grad = False
-
-    #     for active_adapter in self.active_adapters:
-    #         bias = self.peft_config[active_adapter].bias
-    #         if bias == "none":
-    #             continue
-
-    #         if bias == "all":
-    #             for n, p in model.named_parameters():
-    #                 if "bias" in n:
-    #                     p.requires_grad = True
-    #         elif bias == "lora_only":
-    #             for m in model.modules():
-    #                 if (
-    #                     isinstance(m, LoraLayer)
-    #                     and hasattr(m, "bias")
-    #                     and m.bias is not None
-    #                 ):
-    #                     m.bias.requires_grad = True
-    #         else:
-    #             raise NotImplementedError(
-    #                 f"Requested bias: {bias}, is not implemented."
-    #             )
-
     @staticmethod
     def _create_new_module(lora_config, adapter_name, target, **kwargs):
         # Collect dispatcher functions to decide what backend to use for the replaced LoRA layer. The order matters,
@@ -349,17 +263,7 @@ class LoraModel_PEFT(BaseAlgorithm):
 
             dispatchers.append(dispatch_bnb_4bit)
 
-        dispatchers.extend(
-            [
-                # dispatch_eetq,
-                # dispatch_aqlm,
-                # dispatch_awq,
-                # dispatch_gptq,
-                # dispatch_hqq,
-                # dispatch_megatron,
-                dispatch_default
-            ]
-        )
+        dispatchers.extend([dispatch_default])
 
         new_module = None
         for dispatcher in dispatchers:
@@ -489,14 +393,6 @@ class LoraModel_PEFT(BaseAlgorithm):
 
         Currently gptq quantization and replicated layers do not support merging.
         """
-        # if getattr(self.base_model, "quantization_method", None) == "gptq":
-        #     raise ValueError(
-        #         "Cannot merge LORA layers when the model is gptq quantized"
-        #     )
-        # if self.peft_config.get("layer_replication"):
-        #     raise ValueError(
-        #         "Cannot merge LORA layers when base model layers are replicated"
-        #     )
 
     @staticmethod
     def _prepare_adapter_config(peft_config, model_config):
@@ -702,7 +598,7 @@ class LoraModel_PEFT(BaseAlgorithm):
                 adapters=adapters,
                 combination_type=combination_type,
                 svd_rank=svd_rank,
-            )           
+            )
         )
 
         self.peft_config[self.adapter_name] = replace(

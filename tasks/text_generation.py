@@ -134,7 +134,7 @@ class CausalLLM(BaseTrainer):
                     model = AutoModelForCausalLM.from_pretrained(
                         self.model_path,
                         use_flash_attention_2=self.flash_attention,
-                        #device_map="auto",
+                        # device_map="auto",
                         torch_dtype=torch.float16,
                         **self.model_args,
                     )
