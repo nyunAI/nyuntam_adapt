@@ -1,18 +1,18 @@
+import sys
 import torch
 import torch.nn as nn
-from typing import Any, Mapping, Optional, Tuple, List
+from typing import Any
 from collections import deque
-from .utils import _get_submodules
 from abc import abstractmethod
-from tasks.timm_image_classification import TimmforImageClassification
-import logging
+
 import bitsandbytes as bnb
-from functools import reduce
 from peft.tuners.tuners_utils import BaseTuner
-import sys
+
+from nyuntam_adapt.tasks.timm_image_classification import TimmforImageClassification
+from nyuntam_adapt.utils import get_submodules
 
 sys.path.append("/workspace/Adapt/logging_adapt")
-from logging_adapt import define_logger
+import logging
 
 
 class BaseAlgorithm(nn.Module):
@@ -36,7 +36,7 @@ class BaseAlgorithm(nn.Module):
     ):
         super(BaseAlgorithm, self).__init__()
         self.logging_path = logging_path
-        self.logger = define_logger(__name__, self.logging_path)
+        self.logger = logging.getLogger(__name__)
 
         self.base_model = model
         self.peft_config = peft_config
@@ -368,7 +368,7 @@ class BaseAlgorithm(nn.Module):
         key_list = self._generate_target_modules(model)
         skip_list = []
         for key in key_list:
-            parent, target, target_name = _get_submodules(model, key)
+            parent, target, target_name = get_submodules(model, key)
             optional_kwargs = {
                 "loaded_in_8bit": getattr(model, "is_loaded_in_8bit", False),
                 "loaded_in_4bit": getattr(model, "is_loaded_in_4bit", False),
@@ -400,12 +400,3 @@ class BaseAlgorithm(nn.Module):
         Forward pass of the model.
         """
         self.base_model.forward(*args, **kwargs)
-
-
-def get_peft_state_dict(model):
-    modules_to_save = {}
-    for name, param in model.named_parameters():
-        if param.requires_grad == True:
-            modules_to_save[name] = param
-
-    return modules_to_save

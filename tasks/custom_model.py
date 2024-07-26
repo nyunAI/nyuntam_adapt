@@ -1,6 +1,6 @@
 import torch
 import warnings
-import os
+from collections import OrderedDict
 from transformers import (
     AutoConfig,
     BitsAndBytesConfig,
@@ -13,9 +13,6 @@ from transformers import (
     AutoModelForImageClassification,
     DataCollatorForLanguageModeling,
 )
-from collections import OrderedDict
-from .timm_image_classification import TimmforImageClassification
-from pathlib import Path
 
 ALLOWED_EXTENSIONS = {".pt", ".bin", ".pth"}
 

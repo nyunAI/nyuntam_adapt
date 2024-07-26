@@ -1,10 +1,5 @@
-# referenced https://github.com/huggingface/notebooks/blob/main/examples/token_classification.ipynb
-
-# input column for token classification must be 'tokens' and labels must be '{subtask}_tags'
-import torch
 import numpy as np
 from datasets import load_metric
-from .base_trainer import BaseTrainer
 from transformers import (
     AutoConfig,
     BitsAndBytesConfig,
@@ -14,8 +9,8 @@ from transformers import (
     AutoModelForTokenClassification,
     DataCollatorForTokenClassification,
 )
-from .utils import prepare_model_for_kbit_training, load_model_from_checkpoint
 from .custom_model import prepare_custom_model_support
+from nyuntam_adapt.core.base_task import BaseTask
 
 
 class ModelLoadingError(RuntimeError):
@@ -24,7 +19,7 @@ class ModelLoadingError(RuntimeError):
     pass
 
 
-class SequenceClassification(BaseTrainer):
+class SequenceClassification(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.task = "Classification"

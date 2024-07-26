@@ -1,15 +1,14 @@
 import warnings
-import math
 import bitsandbytes as bnb
 import torch
 import torch.nn as nn
-from algorithms.utils import (
-    Transpose,
+
+from .layer import SSFLayer
+from nyuntam_adapt.utils import (
     is_bnb_4bit_available,
     is_bnb_available,
     dequantize_8bit,
 )
-from .layer import SSFLayer
 
 
 if is_bnb_available():

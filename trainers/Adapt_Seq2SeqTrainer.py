@@ -1,13 +1,13 @@
-from .Adapt_Trainer import AdaptTrainer
 from transformers import Seq2SeqTrainer
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Dict
+from nyuntam_adapt.core.base_trainer import BaseTrainer
 
 
-class AdaptSeq2SeqTrainer(Seq2SeqTrainer, AdaptTrainer):
+class AdaptSeq2SeqTrainer(Seq2SeqTrainer, BaseTrainer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._save = super(AdaptTrainer, self)._save
-        self.log = super(AdaptTrainer, self).log
+        self._save = super(BaseTrainer, self)._save
+        self.log = super(BaseTrainer, self).log
 
     def _save(self, output_dir=None, state_dict=None):
         super()._save(output_dir, state_dict)

@@ -1,6 +1,3 @@
-from .params import create_instance, AdaptParams
-
-
 def initialize_initialization(task, subtask):
     if task == "text_generation":
         from nyuntam_adapt.tasks.text_generation import CausalLLM

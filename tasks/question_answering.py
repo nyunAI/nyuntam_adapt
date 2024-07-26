@@ -1,11 +1,8 @@
 # SQUAd v2 format
-import nltk
 import collections
 import numpy as np
 from tqdm.auto import tqdm
-from datasets import load_dataset, load_metric
-from evaluate import load
-from .base_trainer import BaseTrainer
+from datasets import load_metric
 from transformers import (
     AutoConfig,
     AutoTokenizer,
@@ -13,9 +10,9 @@ from transformers import (
     default_data_collator,
     BitsAndBytesConfig,
 )
-
-from .utils import prepare_model_for_kbit_training, load_model_from_checkpoint
 from .custom_model import prepare_custom_model_support
+from nyuntam_adapt.core.base_task import BaseTask
+from nyuntam_adapt.utils import prepare_model_for_kbit_training
 
 
 class ModelLoadingError(RuntimeError):
@@ -24,7 +21,7 @@ class ModelLoadingError(RuntimeError):
     pass
 
 
-class QuestionAnswering(BaseTrainer):
+class QuestionAnswering(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.max_length = kwargs.get("max_length", 384)

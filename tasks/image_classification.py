@@ -1,18 +1,16 @@
 import torch
 import numpy as np
 from datasets import load_metric
-from .utils import TimmModelConfig
-from .base_trainer import BaseTrainer
-from .timm_image_classification import TimmforImageClassification
 from transformers import (
     AutoConfig,
     AutoModelForImageClassification,
     AutoImageProcessor,
     BitsAndBytesConfig,
 )
-from .utils import prepare_model_for_kbit_training, load_model_from_checkpoint
+from .timm_image_classification import TimmforImageClassification
 from .custom_model import prepare_custom_image_model_support, prepare_timm_model_support
-from collections import OrderedDict
+from nyuntam_adapt.utils import TimmModelConfig
+from nyuntam_adapt.core.base_task import BaseTask
 
 
 # =========== Exceptions ===========
@@ -31,7 +29,7 @@ class ModelLoadingError(RuntimeError):
 # TODO Create Folder structure to be followed and suggest Augmentations based on heuristics and dataset
 
 
-class ImageClassification(BaseTrainer):
+class ImageClassification(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.framework = kwargs["MODEL_ARGS"].get("FRAMEWORK", "Huggingface")

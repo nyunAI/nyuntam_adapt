@@ -1,6 +1,4 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import importlib
 import bitsandbytes as bnb
 
@@ -367,7 +365,7 @@ def Transpose(weight, fan_in_fan_out):
     return weight.T if fan_in_fan_out else weight
 
 
-def _get_submodules(model, key):
+def get_submodules(model, key):
     parent = model.get_submodule(".".join(key.split(".")[:-1]))
     target_name = key.split(".")[-1]
     target = model.get_submodule(key)
@@ -416,3 +414,12 @@ def dequantize_8bit(module):
         out32, Sout32, SCim, module.state.SCB, bias=None
     ).t()
     return output
+
+
+def get_peft_state_dict(model):
+    modules_to_save = {}
+    for name, param in model.named_parameters():
+        if param.requires_grad == True:
+            modules_to_save[name] = param
+
+    return modules_to_save
