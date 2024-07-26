@@ -1,4 +1,4 @@
-def initialize_initialization(task, subtask):
+def initialize_initialization(task, subtask=None):
     if task == "text_generation":
         from nyuntam_adapt.tasks.text_generation import CausalLLM
 
