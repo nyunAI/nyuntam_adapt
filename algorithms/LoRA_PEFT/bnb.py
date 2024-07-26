@@ -8,6 +8,7 @@ import torch
 
 from peft.import_utils import is_bnb_4bit_available, is_bnb_available
 from peft.tuners.tuners_utils import BaseTunerLayer, check_adapters_to_merge
+
 # from peft.utils.integrations import dequantize_bnb_weight
 from ..peft_utils.integrations import dequantize_bnb_weight
 from peft.utils.other import transpose
@@ -46,7 +47,9 @@ if is_bnb_available():
                 use_dora=use_dora,
             )
 
-        def merge(self, safe_merge: bool = False, adapter_names: Optional[list[str]] = None) -> None:
+        def merge(
+            self, safe_merge: bool = False, adapter_names: Optional[list[str]] = None
+        ) -> None:
             """
             Merge the active adapter weights into the base weights
 
@@ -95,7 +98,9 @@ if is_bnb_available():
                     # cannot calculate it on the fly based on the merged weights when unmerging because its a
                     # different value
                     self._cache_store(f"{active_adapter}-weight_norm", weight_norm)
-                    dora_factor = self.lora_magnitude_vector[active_adapter].weight / weight_norm
+                    dora_factor = (
+                        self.lora_magnitude_vector[active_adapter].weight / weight_norm
+                    )
                     w_data = dora_factor.view(-1, 1) * (output + lora_data)
 
                 if safe_merge and not torch.isfinite(w_data).all():
@@ -104,7 +109,9 @@ if is_bnb_available():
                     )
 
                 self.get_base_layer().weight = bnb.nn.Int8Params(
-                    w_data.to("cpu"), requires_grad=False, has_fp16_weights=weight.has_fp16_weights
+                    w_data.to("cpu"),
+                    requires_grad=False,
+                    has_fp16_weights=weight.has_fp16_weights,
                 ).to(weight.device)
                 state.reset_grads()
                 self.merged_adapters.append(active_adapter)
@@ -136,11 +143,15 @@ if is_bnb_available():
                     w_data = output.to(lora_data.dtype).to(lora_data.device) - lora_data
                 else:
                     weight_norm = self._cache_pop(f"{active_adapter}-weight_norm")
-                    dora_factor = self.lora_magnitude_vector[active_adapter].weight / weight_norm
+                    dora_factor = (
+                        self.lora_magnitude_vector[active_adapter].weight / weight_norm
+                    )
                     w_data = output.data / dora_factor.view(-1, 1) - lora_data
 
                 self.get_base_layer().weight = bnb.nn.Int8Params(
-                    w_data.to("cpu"), requires_grad=False, has_fp16_weights=weight.has_fp16_weights
+                    w_data.to("cpu"),
+                    requires_grad=False,
+                    has_fp16_weights=weight.has_fp16_weights,
                 ).to(weight.device)
                 state.reset_grads()
 
@@ -163,7 +174,13 @@ if is_bnb_available():
             unique_adapters = set(adapter_names)
             sub_batch_indices_list = []
             for adapter in unique_adapters:
-                sub_batch_indices_list.append([index for index, item in enumerate(adapter_names) if item == adapter])
+                sub_batch_indices_list.append(
+                    [
+                        index
+                        for index, item in enumerate(adapter_names)
+                        if item == adapter
+                    ]
+                )
 
             for i, active_adapter in enumerate(unique_adapters):
                 if active_adapter == "__base__":
@@ -202,7 +219,9 @@ if is_bnb_available():
                     self.unmerge()
                 result = self.base_layer(x, *args, **kwargs)
             elif adapter_names is not None:
-                result = self._mixed_batch_forward(x, *args, adapter_names=adapter_names, **kwargs)
+                result = self._mixed_batch_forward(
+                    x, *args, adapter_names=adapter_names, **kwargs
+                )
             elif self.merged:
                 result = self.base_layer(x, *args, **kwargs)
             else:
@@ -299,7 +318,9 @@ if is_bnb_4bit_available():
                 use_dora=use_dora,
             )
 
-        def merge(self, safe_merge: bool = False, adapter_names: Optional[list[str]] = None) -> None:
+        def merge(
+            self, safe_merge: bool = False, adapter_names: Optional[list[str]] = None
+        ) -> None:
             """
             Merge the active adapter weights into the base weights
 
@@ -344,7 +365,9 @@ if is_bnb_4bit_available():
                     # cannot calculate it on the fly based on the merged weights when unmerging because its a
                     # different value
                     self._cache_store(f"{active_adapter}-weight_norm", weight_norm)
-                    dora_factor = self.lora_magnitude_vector[active_adapter].weight / weight_norm
+                    dora_factor = (
+                        self.lora_magnitude_vector[active_adapter].weight / weight_norm
+                    )
                     w_data = dora_factor.view(-1, 1) * (output + lora_data)
 
                 if safe_merge and not torch.isfinite(w_data).all():
@@ -355,7 +378,9 @@ if is_bnb_4bit_available():
                     kwargs["bnb_quantized"] = False
                 kwargs["requires_grad"] = False
                 kwargs.pop("data", None)
-                self.get_base_layer().weight = bnb.nn.Params4bit(w_data.to("cpu"), **kwargs).to(weight.device)
+                self.get_base_layer().weight = bnb.nn.Params4bit(
+                    w_data.to("cpu"), **kwargs
+                ).to(weight.device)
                 self.merged_adapters.append(active_adapter)
 
         def unmerge(self) -> None:
@@ -383,14 +408,18 @@ if is_bnb_4bit_available():
                     w_data = output - lora_data
                 else:
                     weight_norm = self._cache_pop(f"{active_adapter}-weight_norm")
-                    dora_factor = self.lora_magnitude_vector[active_adapter].weight / weight_norm
+                    dora_factor = (
+                        self.lora_magnitude_vector[active_adapter].weight / weight_norm
+                    )
                     w_data = output.data / dora_factor.view(-1, 1) - lora_data
 
                 if "bnb_quantized" in kwargs:
                     kwargs["bnb_quantized"] = False
                 kwargs["requires_grad"] = False
                 kwargs.pop("data", None)
-                self.get_base_layer().weight = bnb.nn.Params4bit(w_data.to("cpu"), **kwargs).to(weight.device)
+                self.get_base_layer().weight = bnb.nn.Params4bit(
+                    w_data.to("cpu"), **kwargs
+                ).to(weight.device)
 
         def get_delta_weight(self, adapter):
             return (
@@ -411,7 +440,13 @@ if is_bnb_4bit_available():
             unique_adapters = set(adapter_names)
             sub_batch_indices_list = []
             for adapter in unique_adapters:
-                sub_batch_indices_list.append([index for index, item in enumerate(adapter_names) if item == adapter])
+                sub_batch_indices_list.append(
+                    [
+                        index
+                        for index, item in enumerate(adapter_names)
+                        if item == adapter
+                    ]
+                )
 
             for i, active_adapter in enumerate(unique_adapters):
                 if active_adapter == "__base__":
@@ -448,7 +483,9 @@ if is_bnb_4bit_available():
                     self.unmerge()
                 result = self.base_layer(x, *args, **kwargs)
             elif adapter_names is not None:
-                result = self._mixed_batch_forward(x, *args, adapter_names=adapter_names, **kwargs)
+                result = self._mixed_batch_forward(
+                    x, *args, adapter_names=adapter_names, **kwargs
+                )
             elif self.merged:
                 result = self.base_layer(x, *args, **kwargs)
             else:
@@ -504,7 +541,11 @@ if is_bnb_4bit_available():
             target_base_layer = target
 
         loaded_in_4bit = kwargs.get("loaded_in_4bit", False)
-        if loaded_in_4bit and is_bnb_4bit_available() and isinstance(target_base_layer, bnb.nn.Linear4bit):
+        if (
+            loaded_in_4bit
+            and is_bnb_4bit_available()
+            and isinstance(target_base_layer, bnb.nn.Linear4bit)
+        ):
             fourbit_kwargs = kwargs.copy()
             fourbit_kwargs.update(
                 {
