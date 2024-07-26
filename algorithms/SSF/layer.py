@@ -27,12 +27,8 @@ class SSFLayer:
                 self.ssf_scale = self.ssf_scale.float()
                 self.ssf_shift = self.ssf_shift.float()
         except:
-            # For non distributed training :
-            # TypeError: cannot assign 'torch.cuda.HalfTensor' as parameter
-            #'ssf_scale' (torch.nn.Parameter or None expected)
             pass
-            # self.ssf_scale = self.ssf_scale.to(x.dtype)
-            # self.ssf_shift = self.ssf_shift.to(x.dtype)
+
 
         self.ssf_scale = nn.Parameter(self.ssf_scale.to(self.weight.device))
         self.ssf_shift = nn.Parameter(self.ssf_shift.to(self.weight.device))
@@ -164,3 +160,4 @@ class BatchNorm2d(nn.BatchNorm2d, SSFLayer):
         result = super().forward(x)
         result = self.ssf_ada(result)
         return result
+

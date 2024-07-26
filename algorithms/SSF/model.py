@@ -45,10 +45,10 @@ class SSFModel(BaseAlgorithm):
         if self.peft_config.target_modules is None:
             self.peft_config.target_modules = self.select_modules()
 
-        print(
-            "Default target modules existing in Model are ",
-            self.peft_config.target_modules,
-        )
+        # print(
+        #     "Default target modules existing in Model are ",
+        #     self.peft_config.target_modules,
+        # )
 
         self.inject_module(self.base_model)
 
@@ -157,7 +157,12 @@ class SSFModel(BaseAlgorithm):
     @staticmethod
     def _replace_module(parent, child_name, new_module, child):
         setattr(parent, child_name, new_module)
+
         new_module.weight = child.weight
+
+        if getattr(child.weight, "quant_state", None) is not None:
+            new_module.quant_state = child.weight.quant_state
+
         if hasattr(child, "bias"):
             if child.bias is not None:
                 new_module.bias = child.bias
@@ -187,7 +192,9 @@ class SSFModel(BaseAlgorithm):
                 parent, target, target_name = _get_submodules(self.base_model, key)
             except AttributeError:
                 continue
+
             if isinstance(target, SSFLayer):
+                target = target.to("cuda:0")
                 if isinstance(target, nn.Conv2d):
                     new_module = nn.Conv2d(
                         target.in_channels,
@@ -216,11 +223,6 @@ class SSFModel(BaseAlgorithm):
                         device=target.weight.device,
                     )
                 elif isinstance(target, bnb.nn.Linear8bitLt):
-                    # raise ValueError(
-                    #     (
-                    #         "Currently merging of 8bit layers is not supported for Linear8bit."
-                    #     )
-                    # )
                     bias = target.bias is not None
                     new_module = bnb.nn.Linear8bitLt(
                         target.in_features,
@@ -242,6 +244,7 @@ class SSFModel(BaseAlgorithm):
                     ).to(target.weight.device)
                 if merge:
                     target.merge()
+                    target.weight = target.weight.to("cpu")
                 self._replace_module(parent, target_name, new_module, target)
                 del target
                 gc.collect()

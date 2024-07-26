@@ -12,9 +12,6 @@ import logging
 import sys
 from glob import glob
 
-sys.path.append("/workspace/Adapt")
-
-sys.path.append("/workspace/Adapt/logging_adapt")
 from logging_adapt import define_logger
 from dataset import Dataset
 from pathlib import Path
@@ -22,8 +19,6 @@ from safetensors.torch import save_model
 from safetensors import safe_open
 from utils import CudaDeviceEnviron
 import shutil
-
-# torch.set_default_dtype(torch.float32)
 
 
 class BaseTrainer(object):
@@ -47,7 +42,7 @@ class BaseTrainer(object):
         if self.num_gpu == 1:
             self.device = torch.device(
                 "cuda:" + self.cuda_id
-            )  # torch.device(f"cuda:{str(self.cuda_id)}")
+            )  
         else:
             self.device = torch.device("cuda")
         self.logging_path = kwargs.get("LOGGING_PATH")
@@ -100,8 +95,10 @@ class BaseTrainer(object):
             Path(self.local_model_path) if self.local_model_path else None
         )
         self.fsdp = kwargs.get("FSDP", False)
+        self.fsdp = kwargs.get("FSDP", False)
 
         self.task = kwargs.get("TASK", None)
+        self.hf_trainer = None
 
         # Traning Arguments
         self.num_workers = kwargs["TRAINING_ARGS"].get(
@@ -123,6 +120,12 @@ class BaseTrainer(object):
         self.beta1 = float(kwargs["TRAINING_ARGS"].get("BETA1", 0.9))
         self.beta2 = float(kwargs["TRAINING_ARGS"].get("BETA2", 0.999))
 
+        # MMDET specific arguments
+        self.t_max = kwargs["TRAINING_ARGS"].get("T_MAX") or 100
+        self.milestones = kwargs["TRAINING_ARGS"].get("MILESTONES") or [5, 10]
+        self.gamma = kwargs["TRAINING_ARGS"].get("GAMMA") or 0.1
+        self.begin = kwargs["TRAINING_ARGS"].get("BEGIN") or 0
+        self.end = kwargs["TRAINING_ARGS"].get("END") or self.num_epochs
         self.warmup = kwargs["TRAINING_ARGS"].get("WARMUP") or True
         self.warmup_iters = kwargs["TRAINING_ARGS"].get("WARMUP_ITERS") or 50
         self.warmup_ratio = kwargs["TRAINING_ARGS"].get("WARMUP_RATIO") or 0.1
@@ -223,6 +226,7 @@ class BaseTrainer(object):
                 gradient_accumulation_steps=self.gradient_accumulation_steps,
                 gradient_checkpointing=self.gradient_checkpointing,
                 ddp_find_unused_parameters=True,
+                ddp_find_unused_parameters=True,
             )
 
         self.logger.info(f"Experiment Arguments: {kwargs}")
@@ -320,8 +324,8 @@ class BaseTrainer(object):
             trainer.log_metrics("train", train_results.metrics)
             self.logger.info(f"train : {train_results.metrics}")
             trainer.save_metrics("train", train_results.metrics)
+            self.hf_trainer = trainer
             trainer.save_state()
-            # trainer.save_model()
 
         # Evaluation
         if training_args.do_eval:
@@ -363,9 +367,6 @@ class BaseTrainer(object):
             self.peft_model = BaseAlgorithm(self.model, None, self.logging_path)
             self.logger.info(f"Fine-Tuning all layers")
 
-            # raise ValueError(
-            #     "Either PeFT method should exist or last layer tuning must be  True for Adapting a Model"
-            # )
 
         # Fine-tuning the classifier layer along with PEFT
         if self.last_linear_tuning:
@@ -374,6 +375,7 @@ class BaseTrainer(object):
                 self.peft_model.unfreeze_last_layer(self.model, self.config)
             except Exception as e:
                 try:
+                    # In DDP wrapped models, models are wrapped inside MMDistributedParallel.module
                     self.peft_model.unfreeze_last_layer(self.model.module, self.config)
                 except Exception as e:
                     self.logger.exception(e)
@@ -384,10 +386,7 @@ class BaseTrainer(object):
         save_path = os.path.join(self.output_dir, "peft_modules.pth")
         state_dict = get_peft_state_dict(self.model)
         torch.save(state_dict, save_path)
-        # if self.last_linear_tuning:
-        #     self.peft_model.unfreeze_last_layer(self.model, self.config)
 
-        # self.peft_model.calc_trainable_params()
 
     def sampling_dataset(self):
         if self.max_train_samples is not None:
@@ -408,13 +407,20 @@ class BaseTrainer(object):
 
     def save_huggingface(self):
         try:
-            self.model.save_pretrained(self.output_dir)
+            if self.peft_method is not None:
+                self.peft_model.save_pretrained(self.output_dir)
+            else:
+                self.model.save_pretrained(self.output_dir)
             self.logger.info(f"Saving pretrained model at: {self.output_dir}")
             return True
         except:
             try:
-                self.model.generation_config.do_sample = True
-                self.model.save_pretrained(self.output_dir)
+                if self.peft_method is not None:
+                    self.peft_model.generation_config.do_sample = True
+                    self.peft_model.save_pretrained(self.output_dir)
+                else:
+                    self.model.generation_config.do_sample = True
+                    self.model.save_pretrained(self.output_dir)
                 self.logger.info(f"Saving pretrained model at: {self.output_dir}")
                 return True
             except Exception as e:
@@ -426,7 +432,10 @@ class BaseTrainer(object):
             state_dict_path = os.path.join(
                 self.output_dir, "merged_model_state_dict.pth"
             )
-            torch.save(self.model.state_dict(), state_dict_path)
+            if self.peft_method is not None:
+                torch.save(self.peft_model.state_dict(), state_dict_path)
+            else:
+                torch.save(self.model.state_dict(), state_dict_path)
             self.logger.info(f"Saving model state_dict at: {state_dict_path}")
             return True
         except Exception as e:
@@ -437,9 +446,15 @@ class BaseTrainer(object):
         try:
             model_path = os.path.join(self.output_dir, "merged_model.pth")
             try:
-                torch.save(self.model.model, model_path)
+                if self.peft_method is not None:
+                    torch.save(self.peft_model.model, model_path)
+                else:
+                    torch.save(self.model.model, model_path)
             except:
-                torch.save(self.model, model_path)
+                if self.peft_method is not None:
+                    torch.save(self.peft_model, model_path)
+                else:
+                    torch.save(self.model, model_path)
             self.logger.info(f"Saving model at: {model_path}")
             return True
         except Exception as e:
@@ -451,8 +466,15 @@ class BaseTrainer(object):
             safetensors_path = os.path.join(
                 self.output_dir, "merged_model_safetensors.safetensors"
             )
-            with safe_open(safetensors_path, framework="pt", device="cpu"):
-                safe_open.save_transformer_converter(self.model)
+            from safetensors.torch import save_file
+
+            if self.peft_method is not None:
+                state_dict = self.peft_model.state_dict()
+                save_file(state_dict, safetensors_path)
+            else:
+                state_dict = self.model.state_dict()
+                save_file(state_dict, safetensors_path)
+
             self.logger.info(f"Saving model as SafeTensors at: {safetensors_path}")
             return True
         except Exception as e:
@@ -472,10 +494,12 @@ class BaseTrainer(object):
         }
 
         if SAVE_MAP[self.save_method]():
+            print(f"MODEL SAVED USING : {self.save_method}")
             return True
         else:
             for method in SAVE_MAP.values():
                 if method():
+                    print(f"MODEL SAVED USING : {method}")
                     return True
 
         return False
@@ -504,8 +528,6 @@ class BaseTrainer(object):
 
         # Model
         self.model, self.processor, self.config = self.prepare_model()
-        # Exclusively defining a dtype here
-        # self.model = self.model.to(torch.float16)
         self.add_peft_modules(model_type=self.config.model_type)
 
         # Training and evaluation
@@ -518,17 +540,61 @@ class BaseTrainer(object):
             self.collate_fn,
         )
         if self.merge_adapter:
-            # self.peft_model.unload_and_merge()
             try:
-                self.peft_model.unload_and_merge()
-                self.logger.info("PEFT modules merging done.")
+                if self.fsdp:
+                    state_dict = self.hf_trainer.accelerator.get_state_dict(
+                        self.peft_model
+                    )
+                    from safetensors.torch import save_file
+
+                    save_file(
+                        state_dict,
+                        os.path.join(self.output_dir, "model_state_dict.safetensors"),
+                    )
+                    print(type(os.getenv("LOCAL_RANK")), os.getenv("LOCAL_RANK"))
+                    if os.getenv("LOCAL_RANK") == "0":
+                        from safetensors import safe_open
+
+                        tensors = {}
+                        with safe_open(
+                            os.path.join(
+                                self.output_dir, "model_state_dict.safetensors"
+                            ),
+                            framework="pt",
+                            device=0,
+                        ) as f:
+                            for k in f.keys():
+                                tensors[k] = f.get_tensor(k)
+
+                        # To save memory, we can delete everything but the LoRA layers:
+                        for k in tensors:
+                            if ("lora" not in k) and ("ssf" not in k):
+                                tensors[k] = None
+
+                        # Load the base model again and add random adapters
+                        self.model, self.processor, self.config = self.prepare_model()
+                        self.add_peft_modules(model_type=self.config.model_type)
+
+                        new_sd = self.peft_model.state_dict()
+                        for k in new_sd:
+                            if ("lora" in k) or ("ssf" in k):
+                                new_sd[k] = tensors[k]
+                        self.peft_model.load_state_dict(new_sd)
+                        print(self.peft_model.device)
+                        self.peft_model.unload_and_merge()
+                        self.logger.info(" FSDP PEFT modules merging done.")
+                    elif os.getenv("LOCAL_RANK") == "1":
+                        sys.exit(0)
+
+                else:
+                    self.peft_model.unload_and_merge()
+                    self.logger.info("PEFT modules merging done.")
             except Exception as e:
                 self.logger.info(
                     f"Following exception happened while attempting to merge : {e}"
                 )
                 self.logger.info(f"Saving PEFT modules independently")
                 self.save_peft_modules()
-
         assert self.save_adapted_model(), "Failed to save model."
         self.delete_checkpoint_dir()
 
