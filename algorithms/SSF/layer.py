@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from typing import Tuple, Union
 import warnings
 import torch.nn as nn
 import torch
@@ -28,7 +28,6 @@ class SSFLayer:
                 self.ssf_shift = self.ssf_shift.float()
         except:
             pass
-
 
         self.ssf_scale = nn.Parameter(self.ssf_scale.to(self.weight.device))
         self.ssf_shift = nn.Parameter(self.ssf_shift.to(self.weight.device))
@@ -160,4 +159,3 @@ class BatchNorm2d(nn.BatchNorm2d, SSFLayer):
         result = super().forward(x)
         result = self.ssf_ada(result)
         return result
-

@@ -2,21 +2,16 @@ from __future__ import annotations
 
 import math
 import operator
-import re
 import warnings
 from contextlib import contextmanager
 from dataclasses import asdict, replace
 from enum import Enum
 from functools import partial, reduce
-from itertools import chain
 from typing import Literal, Optional
-from dataclasses import dataclass
-from algorithms.base_algorithm import BaseAlgorithm
-
+from tqdm import tqdm
 
 import torch
 from torch import nn
-from tqdm import tqdm
 
 from peft.import_utils import is_bnb_4bit_available, is_bnb_available
 from peft.tuners.tuners_utils import (
@@ -40,16 +35,10 @@ from peft.utils.merge_utils import (
     task_arithmetic,
     ties,
 )
-
-# from .aqlm import dispatch_aqlm
-# from .awq import dispatch_awq
 from .config import LoraConfig_PEFT
-
-# from .eetq import dispatch_eetq
-# from .gptq import dispatch_gptq
-# from .hqq import dispatch_hqq
 from .layer import Conv2d, LoraLayer, dispatch_default
-from .tp_layer import dispatch_megatron
+
+from nyuntam_adapt.core.base_algorithm import BaseAlgorithm
 
 
 def _adapter_names_pre_forward_hook(target, args, kwargs, adapter_names):

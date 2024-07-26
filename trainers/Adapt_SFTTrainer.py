@@ -1,10 +1,10 @@
 from trl import SFTTrainer
-from .Adapt_Trainer import AdaptTrainer
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Dict
 from itertools import chain
+from nyuntam_adapt.core.base_trainer import BaseTrainer
 
 
-class AdaptSFTTrainer(SFTTrainer, AdaptTrainer):
+class AdaptSFTTrainer(SFTTrainer, BaseTrainer):
     def __init__(self, **kwargs):
         self.flash_attention = kwargs.pop("flash_attn")
         self.block_size = kwargs.pop("block_size")

@@ -1,27 +1,28 @@
 import os
+import shutil
+import sys
+from abc import abstractmethod
+from glob import glob
+from pathlib import Path
+
 import torch
-import warnings
-import warnings
 from transformers import TrainingArguments
 from datasets import load_dataset
-from algorithms.base_algorithm import BaseAlgorithm, get_peft_state_dict
-from .utils import PEFT_TYPE_TO_MODEL_MAPPING, PEFT_TYPE_TO_CONFIG_MAPPING
-from abc import abstractmethod
-from Trainers import AdaptTrainer, AdaptSeq2SeqTrainer, AdaptSFTTrainer
+
+
 import logging
-import sys
-from glob import glob
+from nyuntam_adapt.core.base_algorithm import BaseAlgorithm
+from nyuntam_adapt.core.dataset import Dataset
+from nyuntam_adapt.utils import (
+    get_peft_state_dict,
+    PEFT_TYPE_TO_MODEL_MAPPING,
+    PEFT_TYPE_TO_CONFIG_MAPPING,
+)
+from nyuntam_adapt.trainers import AdaptSeq2SeqTrainer, AdaptSFTTrainer
+from nyuntam_adapt.core.base_trainer import BaseTrainer
 
-from logging_adapt import define_logger
-from dataset import Dataset
-from pathlib import Path
-from safetensors.torch import save_model
-from safetensors import safe_open
-from utils import CudaDeviceEnviron
-import shutil
 
-
-class BaseTrainer(object):
+class BaseTask(object):
     """Base Trainer class that defines the structure of each adaptation
     algorithm implemented in this library. Every new tasks is
     expected to directly use or overwrite the template functions defined below.
@@ -40,13 +41,11 @@ class BaseTrainer(object):
         self.cuda_id = kwargs.get("cuda_id", "0")
         self.num_gpu = torch.cuda.device_count()
         if self.num_gpu == 1:
-            self.device = torch.device(
-                "cuda:" + self.cuda_id
-            )  
+            self.device = torch.device("cuda:" + self.cuda_id)
         else:
             self.device = torch.device("cuda")
         self.logging_path = kwargs.get("LOGGING_PATH")
-        self.logger = define_logger(__name__, self.logging_path)
+        self.logger = logging.getLogger(__name__)
         self.user_folder = kwargs.get("USER_FOLDER", "user_data")
 
         # write code to accept from test.yaml file
@@ -226,7 +225,6 @@ class BaseTrainer(object):
                 gradient_accumulation_steps=self.gradient_accumulation_steps,
                 gradient_checkpointing=self.gradient_checkpointing,
                 ddp_find_unused_parameters=True,
-                ddp_find_unused_parameters=True,
             )
 
         self.logger.info(f"Experiment Arguments: {kwargs}")
@@ -302,7 +300,7 @@ class BaseTrainer(object):
 
         # Training
         if training_args.do_train:
-            selected_trainer = self.task_trainer.get(self.task, AdaptTrainer)
+            selected_trainer = self.task_trainer.get(self.task, BaseTrainer)
             # self.logger.info("selected trainer : ", selected_trainer)
             trainer = selected_trainer(
                 model=model,
@@ -367,7 +365,6 @@ class BaseTrainer(object):
             self.peft_model = BaseAlgorithm(self.model, None, self.logging_path)
             self.logger.info(f"Fine-Tuning all layers")
 
-
         # Fine-tuning the classifier layer along with PEFT
         if self.last_linear_tuning:
             self.config = getattr(self, "config", None)
@@ -386,7 +383,6 @@ class BaseTrainer(object):
         save_path = os.path.join(self.output_dir, "peft_modules.pth")
         state_dict = get_peft_state_dict(self.model)
         torch.save(state_dict, save_path)
-
 
     def sampling_dataset(self):
         if self.max_train_samples is not None:

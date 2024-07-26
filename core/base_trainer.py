@@ -2,23 +2,23 @@ import torch
 import os
 import sys
 import warnings
+from typing import Callable, Dict, List, Optional, Tuple, Union
 from packaging import version
-from transformers.integrations import (
-    get_reporting_integration_callbacks,
-    hp_params,
-)
-from transformers import Trainer
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
-from transformers.training_args import ParallelMode, TrainingArguments
 from torch import nn
-from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampler
+from torch.utils.data import Dataset
+from transformers import Trainer
+from transformers.integrations import get_reporting_integration_callbacks
+from transformers.training_args import ParallelMode, TrainingArguments
 from transformers.modeling_utils import PreTrainedModel, unwrap_model
+from transformers.tokenization_utils_base import PreTrainedTokenizerBase
+from transformers.models.auto.modeling_auto import MODEL_MAPPING_NAMES
+from transformers.trainer_pt_utils import LabelSmoother
+from transformers.utils.quantization_config import QuantizationMethod
 from transformers.data.data_collator import (
     DataCollator,
     DataCollatorWithPadding,
     default_data_collator,
 )
-from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from transformers.trainer_callback import (
     CallbackHandler,
     DefaultFlowCallback,
@@ -28,11 +28,6 @@ from transformers.trainer_callback import (
     TrainerControl,
     TrainerState,
 )
-from transformers.models.auto.modeling_auto import (
-    MODEL_FOR_CAUSAL_LM_MAPPING_NAMES,
-    MODEL_MAPPING_NAMES,
-)
-
 from transformers.trainer_utils import (
     EvalPrediction,
     FSDPOption,
@@ -41,14 +36,7 @@ from transformers.trainer_utils import (
     enable_full_determinism,
     has_length,
 )
-
-from transformers.trainer_pt_utils import LabelSmoother
-
-sys.path.append("/workspace/Adapt/logging_adapt")
-from logging_adapt import define_logger
-
 from transformers.utils import (
-    # logging,
     can_return_loss,
     find_labels,
     is_torch_tpu_available,
@@ -57,9 +45,12 @@ from transformers.utils import (
     is_apex_available,
     is_safetensors_available,
 )
-from transformers.utils.quantization_config import QuantizationMethod
-from algorithms.base_algorithm import get_peft_state_dict
 from safetensors.torch import save_file as safe_save_file
+
+sys.path.append("/workspace/Adapt/logging_adapt")
+import logging
+
+from nyuntam_adapt.utils import get_peft_state_dict
 
 
 DEFAULT_CALLBACKS = [DefaultFlowCallback]
@@ -81,7 +72,7 @@ if is_safetensors_available():
 # logger = logging.get_logger(__name__)
 
 
-class AdaptTrainer(Trainer):
+class BaseTrainer(Trainer):
     def __init__(
         self,
         model: Union[PreTrainedModel, nn.Module] = None,
@@ -103,7 +94,7 @@ class AdaptTrainer(Trainer):
         logging_path: Optional[str] = None,
     ):
         self.logging_path = logging_path
-        self.logger = define_logger(__name__, self.logging_path)
+        self.logger = logging.getLogger(__name__)
 
         if args is None:
             output_dir = "tmp_trainer"

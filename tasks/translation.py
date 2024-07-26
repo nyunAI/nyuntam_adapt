@@ -1,10 +1,5 @@
-import nltk
-import sys
 import numpy as np
-from datasets import load_dataset, load_metric
 from evaluate import load
-import torch
-from .base_trainer import BaseTrainer
 from transformers import (
     AutoConfig,
     AutoTokenizer,
@@ -13,8 +8,8 @@ from transformers import (
     Seq2SeqTrainingArguments,
     BitsAndBytesConfig,
 )
-
-from .utils import prepare_model_for_kbit_training, load_model_from_checkpoint
+from nyuntam_adapt.core.base_task import BaseTask
+from nyuntam_adapt.utils import prepare_model_for_kbit_training
 from .custom_model import prepare_custom_model_support
 
 
@@ -24,7 +19,7 @@ class ModelLoadingError(RuntimeError):
     pass
 
 
-class Translation(BaseTrainer):
+class Translation(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.subtask = kwargs.get("subtask", None)

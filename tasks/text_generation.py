@@ -1,10 +1,4 @@
-# Alpaca format :- Coulumn names -[ instruction, input, output ]
 import torch
-import os
-from pathlib import Path
-import warnings
-from collections import OrderedDict
-from .base_trainer import BaseTrainer
 from transformers import (
     AutoConfig,
     BitsAndBytesConfig,
@@ -12,11 +6,11 @@ from transformers import (
     AutoTokenizer,
     DataCollatorForLanguageModeling,
 )
-from .utils import prepare_model_for_kbit_training, load_model_from_checkpoint
+from nyuntam_adapt.core.base_task import BaseTask
+from nyuntam_adapt.utils import (
+    prepare_model_for_kbit_training,
+)
 from .custom_model import prepare_custom_model_support
-
-from datasets import load_dataset
-import safetensors
 
 
 class ModelLoadingError(RuntimeError):
@@ -25,7 +19,7 @@ class ModelLoadingError(RuntimeError):
     pass
 
 
-class CausalLLM(BaseTrainer):
+class CausalLLM(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.model = None
