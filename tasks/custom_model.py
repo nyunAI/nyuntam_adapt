@@ -63,6 +63,35 @@ def prepare_timm_model_support(custom_model_path, model):
         raise CustomModelLoadError(f"Following Error Happened : {e}") from e
 
 
+def prepare_mm_model_support(custom_model_path, model):
+    try:
+        if not custom_model_path.exists():
+            raise FileNotFoundError(f"Model path {custom_model_path} does not exist.")
+
+        if custom_model_path.is_dir():
+            for file_name in custom_model_path.iterdir():
+                if str(file_name).split("/")[-1] in ["wds.pt", "wds.pth"]:
+                    weights = torch.load(file_name)
+                    break
+                else:
+                    raise FileNotFoundError(
+                        "wds.pt(h) not found in file path. Please ensure that your weight file is named as wds.pt/wds.pth."
+                    )
+            if isinstance(weights, OrderedDict):
+                print("Found a state_dict.")
+                loaded_model = model.load_state_dict(weights)
+                return loaded_model
+            else:
+                print("Found a full model file.")
+                return model
+        else:
+            raise FileNotFoundError(
+                f"Model path {custom_model_path} should be a folder and not a file."
+            )
+    except Exception as e:
+        raise CustomModelLoadError(f"Following Error Happened : {e}") from e
+
+
 def prepare_custom_image_model_support(
     custom_model_path,
     model_name,
