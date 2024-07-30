@@ -1,0 +1,9 @@
+[submodule "tasks/object_detection_mmdet/mmdetection"]
+	path = tasks/object_detection_mmdet/mmdetection
+	url = https://github.com/open-mmlab/mmdetection.git
+[submodule "tasks/image_segmentation_mmseg/mmsegmentation"]
+	path = tasks/image_segmentation_mmseg/mmsegmentation
+	url = https://github.com/open-mmlab/mmsegmentation.git
+[submodule "tasks/pose_estimation_mmpose/mmpose"]
+	path = tasks/pose_estimation_mmpose/mmpose
+	url = https://github.com/open-mmlab/mmpose.git

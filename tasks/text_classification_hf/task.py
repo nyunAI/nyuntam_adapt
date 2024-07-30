@@ -9,7 +9,7 @@ from transformers import (
     AutoModelForTokenClassification,
     DataCollatorForTokenClassification,
 )
-from .custom_model import prepare_custom_model_support
+from nyuntam_adapt.tasks.custom_model import prepare_custom_model_support
 from nyuntam_adapt.core.base_task import BaseTask
 
 

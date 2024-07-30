@@ -7,10 +7,10 @@ from transformers import (
     DataCollatorForLanguageModeling,
 )
 from nyuntam_adapt.core.base_task import BaseTask
-from nyuntam_adapt.utils import (
+from nyuntam_adapt.utils.task_utils import (
     prepare_model_for_kbit_training,
 )
-from .custom_model import prepare_custom_model_support
+from nyuntam_adapt.tasks.custom_model import prepare_custom_model_support
 
 
 class ModelLoadingError(RuntimeError):
