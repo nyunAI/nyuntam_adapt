@@ -1,0 +1,1 @@
+from nyuntam_adapt.tasks.object_detection_mmdet.task import *
