@@ -153,6 +153,26 @@ class FineTuningArgs:
 
 
 @dataclass
+class MmlabsArgs:
+    amp: bool = False
+    resume: bool = False
+    auto_scale_lr: bool = False
+    cfg_options: str = None
+    launcher: str = None
+    dest_root: str = "./.mmdet_cache"
+    train_ann_file: str = "_annotations.coco.json"
+    val_ann_file: str = "_annotations.coco.json"
+    work_dir: str = " ./results/mmdet"
+    num_classes: int = 5
+    checkpoint_interval: int = 5
+    train_img_file: str = "images"
+    train_seg_file: str = "labels"
+    val_img_file: str = "images"
+    val_seg_file: str = "labels"
+    class_list: list = None
+    palette: list = None
+
+@dataclass
 class AdaptParams:
     TASK: str = "text_generation"
     subtask: str = None
@@ -176,6 +196,7 @@ class AdaptParams:
     SSF_CONFIG: SSFConfig = field(default_factory=SSFConfig)
     LoRA_CONFIG: LoRA_PEFT = field(default_factory=LoRA_PEFT)
     BNB_CONFIG: BNBConfig = field(default_factory=BNBConfig)
+    MMLABS_ARGS: MmlabsArgs = field(default_factory=MmlabsArgs)
     SAVE_METHOD: str = "state_dict"
     # Seq2Seq specific arguments
     max_input_length: int = 128
