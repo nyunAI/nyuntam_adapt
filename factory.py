@@ -1,10 +1,9 @@
 from algorithm import Algorithm
 from factory import Factory as BaseFactory, FactoryTypes
-from nyuntam_adapt.utils import AdaptParams, create_instance
+from nyuntam_adapt.utils.params_utils import AdaptParams, create_instance
 from dataclasses import asdict
 
 import os
-import sys
 
 
 class AdaptFactory(BaseFactory):
@@ -21,7 +20,7 @@ class AdaptFactory(BaseFactory):
         self.set_logger(self.kwargs.get("LOGGING_PATH"), stream_stdout=True)
 
         task = self.kwargs.get("TASK", "text_generation")
-        subtask = self.kwargs.get("SUBTASK", None)
+        subtask = self.kwargs.get("subtask", None)
         adapt_params = create_instance(AdaptParams, self.kwargs)
 
         loaded_algorithm = self.get_algorithm(task, subtask)
