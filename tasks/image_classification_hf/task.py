@@ -7,9 +7,12 @@ from transformers import (
     AutoImageProcessor,
     BitsAndBytesConfig,
 )
-from .timm_image_classification import TimmforImageClassification
-from .custom_model import prepare_custom_image_model_support, prepare_timm_model_support
-from nyuntam_adapt.utils import TimmModelConfig
+from nyuntam_adapt.tasks.image_classification_timm import TimmforImageClassification
+from nyuntam_adapt.tasks.custom_model import (
+    prepare_custom_image_model_support,
+    prepare_timm_model_support,
+)
+from nyuntam_adapt.utils.task_utils import TimmModelConfig
 from nyuntam_adapt.core.base_task import BaseTask
 
 
