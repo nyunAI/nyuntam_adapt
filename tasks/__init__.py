@@ -1,6 +1,4 @@
 def initialize_initialization(task, subtask=None):
-    print("TASK IS ::::::::::::::: ", task)
-    print("SUBTASK IS :::::::::::: ", subtask)
     if task == "text_generation":
         from nyuntam_adapt.tasks.text_generation_hf import CausalLLM
 
