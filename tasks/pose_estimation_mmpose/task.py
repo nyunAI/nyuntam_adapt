@@ -98,7 +98,10 @@ class Pose_estimation_mmmpose(BaseTask):
             checkpoint_url = MMPOSE_DEFAULT_MODEL_MAPPING[weights[:-3]]
         else:
             config_file = model_info[config_key]["config"]
-            config_file = osp.join("mmpose", config_file)
+            config_file = osp.join(
+                "nyuntam_adapt/tasks/pose_estimation_mmpose/mmpose",
+                config_file,
+            )
             checkpoint_url = model_info[config_key]["weight"]
 
         return checkpoint_url, config_file
