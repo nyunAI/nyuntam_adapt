@@ -104,7 +104,13 @@ class Obj_detection_mmdet(BaseTask):
             checkpoint_url = MMDETECTION_DEFAULT_MODEL_WEIGHT_MAPPING[weights[:-3]]
         else:
             config_file = model_info[config_key]["config"]
+<<<<<<< Updated upstream
             config_file = osp.join("nyuntam_adapt/tasks/object_detection_mmdet/mmdetection", config_file)
+=======
+            config_file = osp.join(
+                "nyuntam_adapt/tasks/object_detection_mmdet/mmdetection", config_file
+            )
+>>>>>>> Stashed changes
             checkpoint_url = model_info[config_key]["weight"]
 
         return checkpoint_url, config_file
