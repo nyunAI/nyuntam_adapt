@@ -146,16 +146,13 @@ class BaseAlgorithm(nn.Module):
         if hasattr(model, "bbox_head"):
             # MMDET Models
             detection_head_obj = getattr(model, "bbox_head")
-            if (
-                isinstance(detection_head_obj, DETRHead)
-                or isinstance(detection_head_obj, YOLOXHead)
-                or isinstance(detection_head_obj, RTMDetSepBNHead)
-            ):
+            if isinstance(detection_head_obj, (DETRHead, YOLOXHead, RTMDetSepBNHead)):
+
                 for name, p in model.bbox_head.named_modules():
                     last_layer_list.append("bbox_head." + name)
             else:
                 raise AttributeError(
-                    "bbox head of model is not DETRHead"
+                    "Supported bbox_heads are : DETRHead, YOLOXHead, RTMDetSepBNHead"
                 )  # create custom exception name
 
         # For SEGNEXT
@@ -191,18 +188,15 @@ class BaseAlgorithm(nn.Module):
         if hasattr(model, "bbox_head"):
 
             detection_head_obj = getattr(model, "bbox_head")
-            if (
-                isinstance(detection_head_obj, DETRHead)
-                or isinstance(detection_head_obj, YOLOXHead)
-                or isinstance(detection_head_obj, RTMDetSepBNHead)
-            ):
+            if isinstance(detection_head_obj, (DETRHead, YOLOXHead, RTMDetSepBNHead)):
+
                 for name, p in model.bbox_head.named_parameters():
                     p.requires_grad = True
                     self.logger.info(f"Unfreezed {name}")
             else:
 
                 raise AttributeError(
-                    "bbox head of model is not DETRHead"
+                    "Supported bbox_heads are: DETRHead, YOLOXHead, RTMDetSepBNHead"
                 )  # create custom exception name
             return
         if hasattr(model, "decode_head"):
