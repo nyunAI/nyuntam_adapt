@@ -8,7 +8,7 @@ from transformers import (
     BitsAndBytesConfig,
 )
 from nyuntam_adapt.tasks.image_classification_timm import TimmforImageClassification
-from nyuntam_adapt.tasks.custom_model import (
+from nyuntam_adapt.core.custom_model import (
     prepare_custom_image_model_support,
     prepare_timm_model_support,
 )
@@ -188,7 +188,9 @@ class ImageClassification(BaseTask):
                             **self.model_args,
                         )
                 except Exception as e:
-                    raise ModelLoadingError(f"Following Error Happened : {e}") from e
+                    raise ModelLoadingError(
+                        f"Model ({self.model_path}) cannot be loaded due to : {e}, \n Maybe wrong name?"
+                    ) from e
 
         return model, self.image_processor, model_config
 
