@@ -7,11 +7,16 @@ from transformers import (
     DataCollatorForLanguageModeling,
 )
 from nyuntam_adapt.core.base_task import BaseTask
-from nyuntam_adapt.utils.task_utils import (
+from nyuntam_adapt.utils import (
     prepare_model_for_kbit_training,
 )
-from nyuntam_adapt.core.custom_model import prepare_custom_model_support
-from nyuntam_adapt.utils.task_utils import ModelLoadingError
+from .custom_model import prepare_custom_model_support
+
+
+class ModelLoadingError(RuntimeError):
+    """Exception for custom model loading errors."""
+
+    pass
 
 
 class CausalLLM(BaseTask):
@@ -129,9 +134,7 @@ class CausalLLM(BaseTask):
                     )
 
             except Exception as e:
-                raise ModelLoadingError(
-                    f"Model ({self.model_path}) cannot be loaded due to : {e}, \n Maybe wrong name?"
-                ) from e
+                raise ModelLoadingError(f"Following Error Happened : {e}") from e
             if use_bnb:
                 model = prepare_model_for_kbit_training(
                     model, self.gradient_checkpointing
