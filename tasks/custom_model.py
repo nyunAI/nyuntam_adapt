@@ -81,9 +81,9 @@ def prepare_mm_model_support(custom_model_path, model):
                 print("Found a state_dict.")
                 loaded_model = model.load_state_dict(weights)
                 return loaded_model
-            else:
+            elif isinstance(weights, torch.nn.Module):
                 print("Found a full model file.")
-                return model
+                return weights
         else:
             raise FileNotFoundError(
                 f"Model path {custom_model_path} should be a folder and not a file."
@@ -105,7 +105,6 @@ def prepare_custom_image_model_support(
 ):
 
     if framework.lower() == "huggingface":
-        # flag = False
         if custom_model_path.is_dir():
             for file in custom_model_path.iterdir():
                 if file.name == "config.json":
@@ -145,7 +144,6 @@ def prepare_custom_image_model_support(
                         trust_remote_code=True,
                         config=model_config,
                         use_flash_attention_2=use_flash_attention_2,
-                        # device_map="auto",
                         **model_args,
                     )
                 config = AutoConfig.from_pretrained(custom_model_path)
@@ -166,7 +164,6 @@ def prepare_custom_image_model_support(
                         model_name, state_dict=load
                     )
                 elif isinstance(load, torch.nn.Module):  # load is a complete model
-                    # self.logger.info(f"Loading model at {custom_model_path}")
                     model = load
             except Exception as e:
                 raise CustomModelLoadError(f"Following Error Happened : {e}") from e
@@ -344,7 +341,6 @@ def prepare_custom_model_support(
                 else:
                     model = AutoModelForCausalLM.from_pretrained(
                         custom_model_path,
-                        # device_map="auto",
                         use_flash_attention_2=use_flash_attention_2,
                         **model_args,
                     )
@@ -371,12 +367,7 @@ def prepare_custom_model_support(
         try:
             load = torch.load(custom_model_path)
             if isinstance(load, OrderedDict):  # load is a state_dict
-                # self.logger.info(
-                #     f"Loading model from state_dict at {custom_model_path}")
                 if task in ["summarization", "translation"]:
-                    # model = AutoModelForSeq2SeqLM.from_pretrained(
-                    #     model_name, state_dict=load
-                    # )
                     if num_gpu == 1:
                         try:
                             model = AutoModelForSeq2SeqLM.from_pretrained(
@@ -397,14 +388,10 @@ def prepare_custom_model_support(
                             custom_model_path,
                             state_dict=load,
                             use_flash_attention_2=use_flash_attention_2,
-                            # device_map="auto",
                             **model_args,
                         )
 
                 elif task == "question_answering":
-                    # model = AutoModelForQuestionAnswering.from_pretrained(
-                    #     model_name, state_dict=load
-                    # )
                     if num_gpu == 1:
                         try:
                             model = AutoModelForQuestionAnswering.from_pretrained(
@@ -425,14 +412,10 @@ def prepare_custom_model_support(
                             custom_model_path,
                             state_dict=load,
                             use_flash_attention_2=use_flash_attention_2,
-                            # device_map="auto",
                             **model_args,
                         )
 
                 elif task in ["ner", "pos", "chunk"]:
-                    # model = AutoModelForTokenClassification.from_pretrained(
-                    #     model_name, state_dict=load
-                    # )
                     if num_gpu == 1:
                         try:
                             model = AutoModelForTokenClassification.from_pretrained(
@@ -462,14 +445,10 @@ def prepare_custom_model_support(
                             trust_remote_code=True,
                             config=model_config,
                             use_flash_attention_2=use_flash_attention_2,
-                            # device_map="auto",
                             **model_args,
                         )
 
                 elif task == "text_classification":
-                    # model = AutoModelForSequenceClassification.from_pretrained(
-                    #     model_name, state_dict=load
-                    # )
                     if num_gpu == 1:
                         try:
                             model = AutoModelForSequenceClassification.from_pretrained(
@@ -499,7 +478,6 @@ def prepare_custom_model_support(
                             trust_remote_code=True,
                             config=model_config,
                             use_flash_attention_2=use_flash_attention_2,
-                            # device_map="auto",
                             **model_args,
                         )
 
@@ -523,13 +501,11 @@ def prepare_custom_model_support(
                         model = AutoModelForCausalLM.from_pretrained(
                             custom_model_path,
                             state_dict=load,
-                            # device_map="auto",
                             use_flash_attention_2=use_flash_attention_2,
                             **model_args,
                         )
 
             elif isinstance(load, torch.nn.Module):  # load is a complete model
-                # self.logger.info(f"Loading model at {custom_model_path}")
                 model = load
 
             tokenizer = AutoTokenizer.from_pretrained(model_name)
