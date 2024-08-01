@@ -24,17 +24,17 @@ class AdaptFactory(BaseFactory):
         subtask = self.kwargs.get("SUBTASK", None)
         adapt_params = create_instance(AdaptParams, self.kwargs)
 
-        loaded_task = self.get_task(task, subtask)
-        self.task = loaded_task(**asdict(adapt_params))
+        loaded_algorithm = self.get_algorithm(task, subtask)
+        self.algorithm = loaded_algorithm(**asdict(adapt_params))
 
     def run(self) -> None:
-        return self.task.adapt_model()
+        return self.algorithm.adapt_model()
 
     def __call__(self):
-        self.task.adapt_model()
+        self.algorithm.adapt_model()
 
-    def get_task(self, task: str, subtask: str = None) -> Algorithm:
-        from .tasks import export_task_modules
+    def get_algorithm(self, task: str, subtask: str = None) -> Algorithm:
+        from .tasks import initialize_initialization
 
-        loaded_task_module = export_task_modules(task, subtask)
-        return loaded_task_module
+        loaded_algorithm = initialize_initialization(task, subtask)
+        return loaded_algorithm
