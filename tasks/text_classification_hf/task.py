@@ -9,14 +9,9 @@ from transformers import (
     AutoModelForTokenClassification,
     DataCollatorForTokenClassification,
 )
-from .custom_model import prepare_custom_model_support
+from nyuntam_adapt.core.custom_model import prepare_custom_model_support
 from nyuntam_adapt.core.base_task import BaseTask
-
-
-class ModelLoadingError(RuntimeError):
-    """Exception for custom model loading errors."""
-
-    pass
+from nyuntam_adapt.utils.task_utils import ModelLoadingError
 
 
 class SequenceClassification(BaseTask):
@@ -100,7 +95,9 @@ class SequenceClassification(BaseTask):
                             use_flash_attention_2=self.flash_attention,
                         )
                 except Exception as e:
-                    raise ModelLoadingError(f"Following Error Happened : {e}") from e
+                    raise ModelLoadingError(
+                        f"Model ({self.model_path}) cannot be loaded due to : {e}, \n Maybe wrong name?"
+                    ) from e
 
             self.collate_fn = DataCollatorForTokenClassification(
                 tokenizer=self.tokenizer
@@ -165,7 +162,9 @@ class SequenceClassification(BaseTask):
                         )
 
                 except Exception as e:
-                    raise ModelLoadingError(f"Following Error Happened : {e}") from e
+                    raise ModelLoadingError(
+                        f"Model ({self.model_path}) cannot be loaded due to : {e}, \n Maybe wrong name?"
+                    ) from e
 
             self.collate_fn = DataCollatorWithPadding(tokenizer=self.tokenizer)
             self.compute_metrics = self.compute_metrics_sequence

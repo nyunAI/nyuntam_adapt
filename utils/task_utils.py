@@ -31,6 +31,12 @@ PEFT_TYPE_TO_CONFIG_MAPPING = {
 }
 
 
+class ModelLoadingError(RuntimeError):
+    """Exception for any model loading errors."""
+
+    pass
+
+
 class TimmModelConfig(PretrainedConfig):
     def __init__(self, model_type, **kwargs):
         super().__init__(**kwargs)
