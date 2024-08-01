@@ -17,7 +17,7 @@ from mmdet.utils import setup_cache_size_limit_of_dynamo
 from nyuntam_adapt.core.base_task import BaseTask
 from nyuntam_adapt.utils.task_utils import MMDETECTION_DEFAULT_MODEL_WEIGHT_MAPPING
 from nyuntam_adapt.tasks.custom_model import prepare_mm_model_support
-
+from nyuntam_adapt.core.custom_model import CustomModelLoadError
 import logging
 
 
@@ -226,12 +226,16 @@ class ObjDetectionMmdet(BaseTask):
 
         if self.local_model_path:
             try:
-                for file in self.local_model_path.iterdir():
-                    if str(file).split("/")[-1] in ["wds.pt", "wds.pth"]:
-                        self.cfg.load_from = str(file)
-                        self.logger.info(f"MODEL WEIGHTS LOADED FROM {file}")
-            except:
-                pass
+                if self.local_model_path.is_dir():
+                    for file in self.local_model_path.iterdir():
+                        if str(file).split("/")[-1] in ["wds.pt", "wds.pth"]:
+                            self.cfg.load_from = str(file)
+                            self.logger.info(f"MODEL WEIGHTS WILL BE LOADED FROM {file}")
+                else:
+                    self.cfg.load_from = str(file)
+                    self.logger.info(f"MODEL WEIGHTS WILL BE LOADED FROM {file}")
+            except Exception as e:
+                raise CustomModelLoadError(f"Could not set given model path as custom model weight path due to {e}") from e
 
         try:
             self.cfg.model.bbox_head.num_classes = num_classes
