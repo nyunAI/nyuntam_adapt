@@ -14,16 +14,11 @@ from nyuntam_adapt.tasks.custom_model import (
 )
 from nyuntam_adapt.utils.task_utils import TimmModelConfig
 from nyuntam_adapt.core.base_task import BaseTask
+from nyuntam_adapt.utils.task_utils import ModelLoadingError
 
 
 # =========== Exceptions ===========
 class CustomModelLoadError(RuntimeError):
-    """Exception for custom model loading errors."""
-
-    pass
-
-
-class ModelLoadingError(RuntimeError):
     """Exception for custom model loading errors."""
 
     pass
