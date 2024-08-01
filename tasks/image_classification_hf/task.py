@@ -188,7 +188,9 @@ class ImageClassification(BaseTask):
                             **self.model_args,
                         )
                 except Exception as e:
-                    raise ModelLoadingError(f"Following Error Happened : {e}") from e
+                    raise ModelLoadingError(
+                        f"Model ({self.model_path}) cannot be loaded due to : {e}, \n Maybe wrong name?"
+                    ) from e
 
         return model, self.image_processor, model_config
 

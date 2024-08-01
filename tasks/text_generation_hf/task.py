@@ -126,7 +126,9 @@ class CausalLLM(BaseTask):
                     )
 
             except Exception as e:
-                raise ModelLoadingError(f"Following Error Happened : {e}") from e
+                raise ModelLoadingError(
+                    f"Model ({self.model_path}) cannot be loaded due to : {e}, \n Maybe wrong name?"
+                ) from e
             if use_bnb:
                 model = prepare_model_for_kbit_training(
                     model, self.gradient_checkpointing
