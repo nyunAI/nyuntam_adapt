@@ -159,10 +159,10 @@ class MmlabsArgs:
     auto_scale_lr: bool = False
     cfg_options: str = None
     launcher: str = None
-    dest_root: str = "./.mmdet_cache"
+    dest_root: str = "/workspace/nyuntam/user_data/jobs/Adapt/mmdet_cache"
     train_ann_file: str = "_annotations.coco.json"
     val_ann_file: str = "_annotations.coco.json"
-    work_dir: str = " ./results/mmdet"
+    work_dir: str = "/workspace/nyuntam/user_data/jobs/Adapt/results/mmdet"
     num_classes: int = 5
     checkpoint_interval: int = 5
     train_img_file: str = "images"
@@ -183,9 +183,9 @@ class AdaptParams:
     blocksize: int = 128
     cuda_id: str = "0"
     auto_select_modules: bool = True
-    OUTPUT_DIR: str = "abc/jobs/1/"
+    OUTPUT_DIR: str = "/workspace/nyuntam/user_data/jobs/Adapt/1/"
     OVERWRITE_OUTPUT_DIR: bool = False
-    LOGGING_PATH: str = "abc/logs/1/log.log"
+    LOGGING_PATH: str = "/workspace/nyuntam/user_data/logs/Adapt/1/log.log"
     MERGE_ADAPTERS: bool = False
     DATASET_ARGS: DatasetConfig = field(default_factory=DatasetConfig)
     MODEL_ARGS: ModelArgs = field(default_factory=ModelArgs)
