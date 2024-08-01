@@ -11,12 +11,7 @@ from transformers import (
 )
 from nyuntam_adapt.tasks.custom_model import prepare_custom_model_support
 from nyuntam_adapt.core.base_task import BaseTask
-
-
-class ModelLoadingError(RuntimeError):
-    """Exception for custom model loading errors."""
-
-    pass
+from nyuntam_adapt.utils.task_utils import ModelLoadingError
 
 
 class SequenceClassification(BaseTask):
