@@ -31,9 +31,8 @@ PEFT_TYPE_TO_CONFIG_MAPPING = {
 }
 
 
-
 class ModelLoadingError(RuntimeError):
-    """Exception for custom model loading errors."""
+    """Exception for any model loading errors."""
 
     pass
 
