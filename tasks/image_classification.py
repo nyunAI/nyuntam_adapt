@@ -17,6 +17,12 @@ from nyuntam_adapt.utils.task_utils import TimmModelConfig, ModelLoadingError
 from nyuntam_adapt.core.base_task import BaseTask
 
 
+class ModelLoadingError(RuntimeError):
+    """Exception for custom model loading errors."""
+
+    pass
+
+
 # TODO Create Folder structure to be followed and suggest Augmentations based on heuristics and dataset
 
 
@@ -181,9 +187,7 @@ class ImageClassification(BaseTask):
                             **self.model_args,
                         )
                 except Exception as e:
-                    raise ModelLoadingError(
-                        f"Model ({self.model_path}) cannot be loaded due to : {e}, \n Maybe wrong name?"
-                    ) from e
+                    raise ModelLoadingError(f"Following Error Happened : {e}") from e
 
         return model, self.image_processor, model_config
 

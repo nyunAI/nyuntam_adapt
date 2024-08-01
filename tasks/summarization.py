@@ -18,6 +18,12 @@ from nyuntam_adapt.core.base_task import BaseTask
 nltk.download("punkt")
 
 
+class ModelLoadingError(RuntimeError):
+    """Exception for custom model loading errors."""
+
+    pass
+
+
 class Seq2Seq(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -101,9 +107,7 @@ class Seq2Seq(BaseTask):
                         use_flash_attention_2=self.flash_attention,
                     )
             except Exception as e:
-                raise ModelLoadingError(
-                    f"Model ({self.model_path}) cannot be loaded due to : {e}, \n Maybe wrong name?"
-                ) from e
+                raise ModelLoadingError(f"Following Error Happened : {e}") from e
 
         if use_bnb:
             model = prepare_model_for_kbit_training(model, self.gradient_checkpointing)
