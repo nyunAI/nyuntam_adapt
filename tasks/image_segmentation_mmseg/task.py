@@ -14,12 +14,12 @@ from mim.utils import download_from_file
 from .custom_dataset import CustomDataset
 from nyuntam_adapt.core.base_task import BaseTask
 from nyuntam_adapt.utils.task_utils import MMSEGMENTATION_DEFAULT_MODEL_MAPPING
-from nyuntam_adapt.tasks.custom_model import prepare_mm_model_support
+from nyuntam_adapt.tasks.custom_model import prepare_mm_model_support, CustomModelLoadError
 
 import logging
 
 
-class Img_Segmentation_mmseg(BaseTask):
+class ImgSegmentationMmseg(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         setup_cache_size_limit_of_dynamo()
@@ -168,7 +168,6 @@ class Img_Segmentation_mmseg(BaseTask):
         self.cfg.default_hooks.checkpoint.interval = self.checkpoint_intervals
         self.cfg.train_cfg.type = "EpochBasedTrainLoop"
         del self.cfg.train_cfg.max_iters
-        # self.cfg.train_cfg.val_begin = 4
         self.cfg.train_cfg.max_epochs = self.num_epochs
         self.cfg.train_dataloader.batch_size = self.batch_size
 
@@ -200,12 +199,20 @@ class Img_Segmentation_mmseg(BaseTask):
 
         if self.local_model_path:
             try:
-                for file in self.local_model_path.iterdir():
-                    if str(file).split("/")[-1] in ["wds.pt", "wds.pth"]:
-                        self.cfg.load_from = str(file)
-                        self.logger.info(f"MODEL WEIGHTS LOADED FROM {file}")
-            except:
-                pass
+                if self.local_model_path.is_dir():
+                    for file in self.local_model_path.iterdir():
+                        if str(file).split("/")[-1] in ["wds.pt", "wds.pth"]:
+                            self.cfg.load_from = str(file)
+                            self.logger.info(
+                                f"MODEL WEIGHTS WILL BE LOADED FROM {file}"
+                            )
+                else:
+                    self.cfg.load_from = str(file)
+                    self.logger.info(f"MODEL WEIGHTS WILL BE LOADED FROM {file}")
+            except Exception as e:
+                raise CustomModelLoadError(
+                    f"Could not set given model path as custom model weight path due to {e}"
+                ) from e
 
     def get_checkpointing_modules(self, model):
 
