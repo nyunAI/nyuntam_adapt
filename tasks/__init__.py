@@ -35,13 +35,3 @@ def export_task_modules(task, subtask=None):
         from nyuntam_adapt.tasks.object_detection_mmdet import ObjDetectionMmdet
 
         return ObjDetectionMmdet
-
-    elif task == "image_segmentation":
-        from nyuntam_adapt.tasks.image_segmentation_mmseg import Img_Segmentation_mmseg
-
-        return Img_Segmentation_mmseg
-
-    elif task == "pose_estimation":
-        from nyuntam_adapt.tasks.pose_estimation_mmpose import Pose_estimation_mmmpose
-
-        return Pose_estimation_mmmpose
