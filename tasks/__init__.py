@@ -29,3 +29,13 @@ def initialize_initialization(task, subtask=None):
         from nyuntam_adapt.tasks.image_classification import ImageClassification
 
         return ImageClassification
+    
+    elif task == "object_detection":
+        from nyuntam_adapt.tasks.object_detection_mmdet import ObjDetectionMmdet
+
+        return ObjDetectionMmdet
+
+    elif task == "image_segmentation":
+        from nyuntam_adapt.tasks.image_segmentation_mmseg import  ImgSegmentationMmseg
+
+        return ImgSegmentationMmseg
