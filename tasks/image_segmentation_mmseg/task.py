@@ -75,7 +75,7 @@ class Img_Segmentation_mmseg(BaseTask):
             ):
                 self.cfg.auto_scale_lr.enable = True
             else:
-                raise RuntimeError(
+                raise AttributeError(
                     'Can not find "auto_scale_lr" or '
                     '"auto_scale_lr.enable" or '
                     '"auto_scale_lr.base_batch_size" in your'
