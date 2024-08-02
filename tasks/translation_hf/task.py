@@ -9,9 +9,8 @@ from transformers import (
     BitsAndBytesConfig,
 )
 from nyuntam_adapt.core.base_task import BaseTask
-from nyuntam_adapt.utils.task_utils import prepare_model_for_kbit_training
+from nyuntam_adapt.utils.task_utils import prepare_model_for_kbit_training, ModelLoadingError
 from nyuntam_adapt.core.custom_model import prepare_custom_model_support
-from nyuntam_adapt.utils.task_utils import ModelLoadingError
 
 
 class Translation(BaseTask):
@@ -37,10 +36,6 @@ class Translation(BaseTask):
             predict_with_generate=predict_with_generate,
             generation_max_length=generation_max_length,
         )
-        # if self.model_name in ["t5-small", "t5-base", "t5-larg", "t5-3b", "t5-11b"]:
-        #     self.prefix = "translate English to Romanian: "
-        # else:
-        #     self.prefix = ""
         self.prefix = kwargs.get("PREFIX", "")
         self.flash_attention = kwargs.get("flash_attention2", False)
         self.model_args = {}
@@ -70,8 +65,6 @@ class Translation(BaseTask):
                 use_flash_attention_2=self.flash_attention,
                 **self.model_args,
             )
-            # if use_bnb:
-            #     model = load_model_from_checkpoint(model,self.flash_attention,bnb_config)
 
         else:
             model_config = AutoConfig.from_pretrained(self.model_path)
@@ -102,7 +95,6 @@ class Translation(BaseTask):
                         ignore_mismatched_sizes=True,
                         trust_remote_code=True,
                         **self.model_args,
-                        # device_map="auto",
                         use_flash_attention_2=self.flash_attention,
                     )
             except Exception as e:

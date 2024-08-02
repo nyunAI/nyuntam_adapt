@@ -12,8 +12,7 @@ from transformers import (
 )
 from nyuntam_adapt.core.custom_model import prepare_custom_model_support
 from nyuntam_adapt.core.base_task import BaseTask
-from nyuntam_adapt.utils.task_utils import prepare_model_for_kbit_training
-from nyuntam_adapt.utils.task_utils import ModelLoadingError
+from nyuntam_adapt.utils.task_utils import prepare_model_for_kbit_training, ModelLoadingError
 
 
 class QuestionAnswering(BaseTask):
