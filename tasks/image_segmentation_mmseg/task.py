@@ -14,8 +14,11 @@ from mim.utils import download_from_file
 from .custom_dataset import CustomDataset
 from nyuntam_adapt.core.base_task import BaseTask
 from nyuntam_adapt.utils.task_utils import MMSEGMENTATION_DEFAULT_MODEL_MAPPING
-from nyuntam_adapt.tasks.custom_model import prepare_mm_model_support, CustomModelLoadError
-
+from nyuntam_adapt.tasks.custom_model import (
+    prepare_mm_model_support,
+    CustomModelLoadError,
+)
+from nyuntam.settings import ROOT
 import logging
 
 
@@ -112,9 +115,12 @@ class ImgSegmentationMmseg(BaseTask):
             checkpoint_url = MMSEGMENTATION_DEFAULT_MODEL_MAPPING[weights[:-3]]
         else:
             config_file = model_info[config_key]["config"]
+            folder_path = osp.join(
+                ROOT, "nyuntam_adapt/tasks/image_segmentation_mmseg/mmsegmentation"
+            )
             config_file = osp.join(
-                "nyuntam_adapt/tasks/image_segmentation_mmseg/mmsegmentation",
-                config_file,
+                folder_path,
+                config_file
             )
             checkpoint_url = model_info[config_key]["weight"]
 
