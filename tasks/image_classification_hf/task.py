@@ -7,20 +7,18 @@ from transformers import (
     AutoImageProcessor,
     BitsAndBytesConfig,
 )
-from .timm_image_classification import TimmforImageClassification
-from .custom_model import prepare_custom_image_model_support, prepare_timm_model_support
-from nyuntam_adapt.utils import TimmModelConfig
+from nyuntam_adapt.tasks.image_classification_timm import TimmforImageClassification
+from nyuntam_adapt.core.custom_model import (
+    prepare_custom_image_model_support,
+    prepare_timm_model_support,
+)
+from nyuntam_adapt.utils.task_utils import TimmModelConfig
 from nyuntam_adapt.core.base_task import BaseTask
+from nyuntam_adapt.utils.task_utils import ModelLoadingError
 
 
 # =========== Exceptions ===========
 class CustomModelLoadError(RuntimeError):
-    """Exception for custom model loading errors."""
-
-    pass
-
-
-class ModelLoadingError(RuntimeError):
     """Exception for custom model loading errors."""
 
     pass
@@ -190,7 +188,9 @@ class ImageClassification(BaseTask):
                             **self.model_args,
                         )
                 except Exception as e:
-                    raise ModelLoadingError(f"Following Error Happened : {e}") from e
+                    raise ModelLoadingError(
+                        f"Model ({self.model_path}) cannot be loaded due to : {e}, \n Maybe wrong name?"
+                    ) from e
 
         return model, self.image_processor, model_config
 

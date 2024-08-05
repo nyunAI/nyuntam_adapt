@@ -6,8 +6,9 @@ from tqdm import tqdm
 from dataclasses import dataclass
 from .layer import Conv2d, Linear, SSFLayer, LayerNorm, BatchNorm2d
 from nyuntam_adapt.core.base_algorithm import BaseAlgorithm
-from nyuntam_adapt.utils import is_bnb_4bit_available, is_bnb_available
-from nyuntam_adapt.utils import (
+from nyuntam_adapt.utils.algorithm_utils import (
+    is_bnb_4bit_available,
+    is_bnb_available,
     get_submodules,
 )
 
