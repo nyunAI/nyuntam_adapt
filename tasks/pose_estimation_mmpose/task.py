@@ -48,7 +48,7 @@ class PoseEstimationMmpose(BaseTask):
         elif self.cfg.get("work_dir", None) is None:
             # use config filename as default work_dir if cfg.work_dir is None
             self.cfg.work_dir = osp.join(
-                ROOT , self.output_dir, "cache" , osp.splitext(osp.basename(config_file))[0]
+                self.output_dir, "cache" , osp.splitext(osp.basename(config_file))[0]
             )
 
         # enable automatic-mixed-precision training
