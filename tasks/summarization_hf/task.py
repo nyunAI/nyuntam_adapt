@@ -11,17 +11,11 @@ from transformers import (
     Seq2SeqTrainingArguments,
     BitsAndBytesConfig,
 )
-from .custom_model import prepare_custom_model_support
-from nyuntam_adapt.utils import prepare_model_for_kbit_training
+from nyuntam_adapt.core.custom_model import prepare_custom_model_support
+from nyuntam_adapt.utils.task_utils import prepare_model_for_kbit_training, ModelLoadingError
 from nyuntam_adapt.core.base_task import BaseTask
 
 nltk.download("punkt")
-
-
-class ModelLoadingError(RuntimeError):
-    """Exception for custom model loading errors."""
-
-    pass
 
 
 class Seq2Seq(BaseTask):
@@ -107,7 +101,9 @@ class Seq2Seq(BaseTask):
                         use_flash_attention_2=self.flash_attention,
                     )
             except Exception as e:
-                raise ModelLoadingError(f"Following Error Happened : {e}") from e
+                raise ModelLoadingError(
+                    f"Model ({self.model_path}) cannot be loaded due to : {e}, \n Maybe wrong name?"
+                ) from e
 
         if use_bnb:
             model = prepare_model_for_kbit_training(model, self.gradient_checkpointing)
