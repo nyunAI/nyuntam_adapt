@@ -30,3 +30,13 @@ def export_task_modules(task, subtask=None):
         from nyuntam_adapt.tasks.image_classification_hf import ImageClassification
 
         return ImageClassification
+    
+    elif task == "object_detection":
+        from nyuntam_adapt.tasks.object_detection_mmdet import ObjDetectionMmdet
+
+        return ObjDetectionMmdet
+
+    elif task == "image_segmentation":
+        from nyuntam_adapt.tasks.image_segmentation_mmseg import  ImgSegmentationMmseg
+
+        return ImgSegmentationMmseg
