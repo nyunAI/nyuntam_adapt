@@ -62,7 +62,7 @@ class ImgSegmentationMmseg(BaseTask):
         elif self.cfg.get("work_dir", None) is None:
             # use config filename as default work_dir if cfg.work_dir is None
             self.cfg.work_dir = osp.join(
-                "./work_dirs", osp.splitext(osp.basename(config_file))[0]
+                self.output_dir, "cache", osp.splitext(osp.basename(config_file))[0]
             )
         # enable automatic-mixed-precision training
         if args["amp"] is True:
@@ -118,10 +118,7 @@ class ImgSegmentationMmseg(BaseTask):
             folder_path = osp.join(
                 ROOT, "nyuntam_adapt/tasks/image_segmentation_mmseg/mmsegmentation"
             )
-            config_file = osp.join(
-                folder_path,
-                config_file
-            )
+            config_file = osp.join(folder_path, config_file)
             checkpoint_url = model_info[config_key]["weight"]
 
         return checkpoint_url, config_file
