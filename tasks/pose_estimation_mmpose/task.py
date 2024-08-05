@@ -46,10 +46,9 @@ class PoseEstimationMmpose(BaseTask):
             # update configs according to CLI args if args.work_dir is not None
             self.cfg.work_dir = args["work_dir"]
         elif self.cfg.get("work_dir", None) is None:
-            work_path = osp.join(ROOT, "user_data/jobs/Adapt/mmpose_cache")
             # use config filename as default work_dir if cfg.work_dir is None
             self.cfg.work_dir = osp.join(
-                work_path, osp.splitext(osp.basename(config_file))[0]
+                ROOT , self.output_dir, "cache" , osp.splitext(osp.basename(config_file))[0]
             )
 
         # enable automatic-mixed-precision training
