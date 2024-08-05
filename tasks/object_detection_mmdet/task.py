@@ -21,6 +21,7 @@ from nyuntam_adapt.tasks.custom_model import (
     CustomModelLoadError,
 )
 import logging
+from nyuntam.settings import ROOT
 
 
 class ObjDetectionMmdet(BaseTask):
@@ -51,7 +52,7 @@ class ObjDetectionMmdet(BaseTask):
         elif self.cfg.get("work_dir", None) is None:
             # use config filename as default work_dir if cfg.work_dir is None
             self.cfg.work_dir = osp.join(
-                "./work_dirs", osp.splitext(osp.basename(config_file))[0]
+                self.output_dir, "cache", osp.splitext(osp.basename(config_file))[0]
             )
 
         # enable automatic-mixed-precision training
@@ -68,7 +69,7 @@ class ObjDetectionMmdet(BaseTask):
             ):
                 self.cfg.auto_scale_lr.enable = True
             else:
-                raise RuntimeError(
+                raise AttributeError(
                     'Can not find "auto_scale_lr" or '
                     '"auto_scale_lr.enable" or '
                     '"auto_scale_lr.base_batch_size" in your'
@@ -106,9 +107,12 @@ class ObjDetectionMmdet(BaseTask):
             checkpoint_url = MMDETECTION_DEFAULT_MODEL_WEIGHT_MAPPING[weights[:-3]]
         else:
             config_file = model_info[config_key]["config"]
-
+            folder_path = osp.join(
+                ROOT, "nyuntam_adapt/tasks/object_detection_mmdet/mmdetection"
+            )
             config_file = osp.join(
-                "nyuntam_adapt/tasks/object_detection_mmdet/mmdetection", config_file
+                folder_path,
+                config_file,
             )
 
             checkpoint_url = model_info[config_key]["weight"]
