@@ -1,10 +1,9 @@
 from algorithm import Algorithm
 from factory import Factory as BaseFactory, FactoryTypes
-from nyuntam_adapt.utils import AdaptParams, create_instance
+from nyuntam_adapt.utils.params_utils import AdaptParams, create_instance
 from dataclasses import asdict
 
 import os
-import sys
 
 
 class AdaptFactory(BaseFactory):
@@ -21,20 +20,20 @@ class AdaptFactory(BaseFactory):
         self.set_logger(self.kwargs.get("LOGGING_PATH"), stream_stdout=True)
 
         task = self.kwargs.get("TASK", "text_generation")
-        subtask = self.kwargs.get("SUBTASK", None)
+        subtask = self.kwargs.get("subtask", None)
         adapt_params = create_instance(AdaptParams, self.kwargs)
 
-        loaded_algorithm = self.get_algorithm(task, subtask)
-        self.algorithm = loaded_algorithm(**asdict(adapt_params))
+        loaded_task = self.get_task(task, subtask)
+        self.task = loaded_task(**asdict(adapt_params))
 
     def run(self) -> None:
-        return self.algorithm.adapt_model()
+        return self.task.adapt_model()
 
     def __call__(self):
-        self.algorithm.adapt_model()
+        self.task.adapt_model()
 
-    def get_algorithm(self, task: str, subtask: str = None) -> Algorithm:
-        from .tasks import initialize_initialization
+    def get_task(self, task: str, subtask: str = None) -> Algorithm:
+        from .tasks import export_task_modules
 
-        loaded_algorithm = initialize_initialization(task, subtask)
-        return loaded_algorithm
+        loaded_task_module = export_task_modules(task, subtask)
+        return loaded_task_module
