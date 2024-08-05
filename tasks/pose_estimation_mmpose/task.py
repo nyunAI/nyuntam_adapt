@@ -14,7 +14,7 @@ from mim.utils import download_from_file
 
 from nyuntam_adapt.core.base_task import BaseTask
 from nyuntam_adapt.utils.task_utils import MMPOSE_DEFAULT_MODEL_MAPPING
-from nyuntam_adapt.tasks.custom_model import (
+from nyuntam_adapt.core.custom_model import (
     prepare_mm_model_support,
     CustomModelLoadError,
 )
