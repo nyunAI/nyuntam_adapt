@@ -14,12 +14,16 @@ from mim.utils import download_from_file
 
 from nyuntam_adapt.core.base_task import BaseTask
 from nyuntam_adapt.utils.task_utils import MMPOSE_DEFAULT_MODEL_MAPPING
-from nyuntam_adapt.tasks.custom_model import prepare_mm_model_support
+from nyuntam_adapt.tasks.custom_model import (
+    prepare_mm_model_support,
+    CustomModelLoadError,
+)
+from nyuntam.settings import ROOT
 
 import logging
 
 
-class Pose_estimation_mmmpose(BaseTask):
+class PoseEstimationMmpose(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         setup_cache_size_limit_of_dynamo()
@@ -42,9 +46,10 @@ class Pose_estimation_mmmpose(BaseTask):
             # update configs according to CLI args if args.work_dir is not None
             self.cfg.work_dir = args["work_dir"]
         elif self.cfg.get("work_dir", None) is None:
+            work_path = osp.join(ROOT, "user_data/jobs/Adapt/mmpose_cache")
             # use config filename as default work_dir if cfg.work_dir is None
             self.cfg.work_dir = osp.join(
-                "./work_dirs", osp.splitext(osp.basename(config_file))[0]
+                work_path, osp.splitext(osp.basename(config_file))[0]
             )
 
         # enable automatic-mixed-precision training
@@ -61,7 +66,7 @@ class Pose_estimation_mmmpose(BaseTask):
             ):
                 self.cfg.auto_scale_lr.enable = True
             else:
-                raise RuntimeError(
+                raise AttributeError(
                     'Can not find "auto_scale_lr" or '
                     '"auto_scale_lr.enable" or '
                     '"auto_scale_lr.base_batch_size" in your'
@@ -98,8 +103,11 @@ class Pose_estimation_mmmpose(BaseTask):
             checkpoint_url = MMPOSE_DEFAULT_MODEL_MAPPING[weights[:-3]]
         else:
             config_file = model_info[config_key]["config"]
+            folder_path = osp.join(
+                ROOT, "nyuntam_adapt/tasks/pose_estimation_mmpose/mmpose"
+            )
             config_file = osp.join(
-                "nyuntam_adapt/tasks/pose_estimation_mmpose/mmpose",
+                folder_path,
                 config_file,
             )
             checkpoint_url = model_info[config_key]["weight"]
@@ -203,12 +211,20 @@ class Pose_estimation_mmmpose(BaseTask):
 
         if self.local_model_path:
             try:
-                for file in self.local_model_path.iterdir():
-                    if str(file).split("/")[-1] in ["wds.pt", "wds.pth"]:
-                        self.cfg.load_from = str(file)
-                        self.logger.info(f"MODEL WEIGHTS LOADED FROM {file}")
-            except:
-                pass
+                if self.local_model_path.is_dir():
+                    for file in self.local_model_path.iterdir():
+                        if str(file).split("/")[-1] in ["wds.pt", "wds.pth"]:
+                            self.cfg.load_from = str(file)
+                            self.logger.info(
+                                f"MODEL WEIGHTS WILL BE LOADED FROM {file}"
+                            )
+                else:
+                    self.cfg.load_from = str(file)
+                    self.logger.info(f"MODEL WEIGHTS WILL BE LOADED FROM {file}")
+            except Exception as e:
+                raise CustomModelLoadError(
+                    f"Could not set given model path as custom model weight path due to {e}"
+                ) from e
 
     def get_checkpointing_modules(self, model):
 
