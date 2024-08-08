@@ -1,28 +1,29 @@
 import os
 import os.path as osp
 import torch
+from pycocotools.coco import COCO
 
+from mmdet.utils import setup_cache_size_limit_of_dynamo
 from mmengine.config import Config
 from mmengine.registry import RUNNERS
 from mmengine.runner import Runner
 from mmengine.model.base_module import BaseModule
-from mmdet.utils import setup_cache_size_limit_of_dynamo
+from mmdetection.mmdet.utils import setup_cache_size_limit_of_dynamo
 from mim.commands.search import get_model_info
 from mim.utils import download_from_file
 
-
-from .custom_dataset import CustomDataset
 from nyuntam_adapt.core.base_task import BaseTask
-from nyuntam_adapt.utils.task_utils import MMSEGMENTATION_DEFAULT_MODEL_MAPPING
+from nyuntam_adapt.utils.task_utils import MMPOSE_DEFAULT_MODEL_MAPPING
 from nyuntam_adapt.core.custom_model import (
     prepare_mm_model_support,
     CustomModelLoadError,
 )
 from nyuntam.settings import ROOT
+
 import logging
 
 
-class ImgSegmentationMmseg(BaseTask):
+class PoseEstimationMmpose(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         setup_cache_size_limit_of_dynamo()
@@ -31,29 +32,14 @@ class ImgSegmentationMmseg(BaseTask):
         checkpoint_url, config_file = self.get_config_details(self.config_file_name)
 
         args = kwargs["MMLABS_ARGS"]
-
-        # load config
         self.logging_path = kwargs.get("LOGGING_PATH")
         self.logger = logging.getLogger(__name__)
-
         self.cfg = Config.fromfile(config_file)
-
         self.cfg.launcher = args["launcher"]
         self.cfg.train_ann_file = args["train_ann_file"]
         self.cfg.val_ann_file = args["val_ann_file"]
         self.cfg.dest_root = args["dest_root"]
         self.checkpoint_intervals = args["checkpoint_interval"]
-
-        self.train_img_path = args["train_img_file"]
-        self.train_seg_path = args["train_seg_file"]
-        self.val_img_path = args["val_img_file"]
-        self.val_seg_path = args["val_seg_file"]
-        self.num_classes = args["num_classes"]
-        self.class_list = tuple(args["class_list"])
-        self.palette = args["palette"]
-
-        CustomDataset.METAINFO["classes"] = self.class_list
-        CustomDataset.METAINFO["palette"] = self.palette
 
         # work_dir is determined in this priority: CLI > segment in file > filename
         if args["work_dir"] is not None:
@@ -62,8 +48,9 @@ class ImgSegmentationMmseg(BaseTask):
         elif self.cfg.get("work_dir", None) is None:
             # use config filename as default work_dir if cfg.work_dir is None
             self.cfg.work_dir = osp.join(
-                self.output_dir, "cache", osp.splitext(osp.basename(config_file))[0]
+                self.output_dir, "cache" , osp.splitext(osp.basename(config_file))[0]
             )
+
         # enable automatic-mixed-precision training
         if args["amp"] is True:
             self.cfg.optim_wrapper.type = "AmpOptimWrapper"
@@ -105,20 +92,23 @@ class ImgSegmentationMmseg(BaseTask):
     def get_config_details(config_file_name):
 
         model_info = get_model_info(
-            "mmsegmentation", shown_fields=["weight", "config", "model"], to_dict=True
+            "mmpose", shown_fields=["weight", "config", "model"], to_dict=True
         )
         config_key = config_file_name
 
         if osp.isfile(config_key):
             config_file = config_key
             weights = config_file.split("/")[-1]
-            checkpoint_url = MMSEGMENTATION_DEFAULT_MODEL_MAPPING[weights[:-3]]
+            checkpoint_url = MMPOSE_DEFAULT_MODEL_MAPPING[weights[:-3]]
         else:
             config_file = model_info[config_key]["config"]
             folder_path = osp.join(
-                ROOT, "nyuntam_adapt/tasks/image_segmentation_mmseg/mmsegmentation"
+                ROOT, "nyuntam_adapt/tasks/pose_estimation_mmpose/mmpose"
             )
-            config_file = osp.join(folder_path, config_file)
+            config_file = osp.join(
+                folder_path,
+                config_file,
+            )
             checkpoint_url = model_info[config_key]["weight"]
 
         return checkpoint_url, config_file
@@ -134,6 +124,16 @@ class ImgSegmentationMmseg(BaseTask):
 
         return absolute_path
 
+    @staticmethod
+    def get_classes(annotation_file):
+        classes = []
+        coco = COCO(annotation_file)
+        categories = coco.loadCats(coco.getCatIds())
+        for cat in categories:
+            classes.append(cat["name"])
+
+        return classes, len(classes)  # get class names
+
     def update_config(self):
         # Unused parameters give error in DDP
         try:
@@ -142,35 +142,43 @@ class ImgSegmentationMmseg(BaseTask):
             pass
 
         self.cfg.data_root = self.custom_dataset_path
-        classes_list = self.class_list
-        num_classes = self.num_classes
-        self.cfg.dataset_type = "CustomDataset"
-        self.cfg.model.decode_head.num_classes = len(self.class_list)
-        self.cfg.train_dataloader.dataset.type = self.cfg.dataset_type
+        self.cfg.dataset_type = "CocoDataset"
+        if self.cfg.data_root:
+            abs_path_annotation_file = osp.abspath(
+                self.cfg.data_root + "/" + self.cfg.train_ann_file
+            )
+        else:
+            abs_path_annotation_file = osp.abspath(
+                self.train_dir + "/" + self.cfg.train_ann_file
+            )
+        classes_list, num_classes = self.get_classes(abs_path_annotation_file)
+        self.cfg.metainfo = {"classes": classes_list}
+
+        # update annotations file name as annotation_coco.json
+
         self.cfg.train_dataloader.dataset.ann_file = self.cfg.train_ann_file
-        self.cfg.train_dataloader.batch_size = self.batch_size
         self.cfg.train_dataloader.dataset.data_root = self.cfg.data_root
-        self.cfg.train_dataloader.dataset.data_prefix.img_path = self.train_img_path
-        self.cfg.train_dataloader.dataset.data_prefix.seg_map_path = self.train_seg_path
-        self.cfg.train_dataloader.dataset.pipeline[1].reduce_zero_label = False
-        self.cfg.val_dataloader.dataset.pipeline[2].reduce_zero_label = False
+        self.cfg.train_dataloader.dataset.data_prefix.img = self.train_dir
+        # self.cfg.train_dataloader.dataset.metainfo = self.cfg.metainfo
+        self.cfg.train_dataloader.dataset.type = "CocoDataset"
 
-        self.cfg.train_dataloader.sampler["type"] = "DefaultSampler"
-
-        self.cfg.val_dataloader.dataset.type = self.cfg.dataset_type
         self.cfg.val_dataloader.dataset.ann_file = self.cfg.val_ann_file
         self.cfg.val_dataloader.dataset.data_root = self.cfg.data_root
-        self.cfg.val_dataloader.dataset.data_prefix.img_path = self.val_img_path
-        self.cfg.val_dataloader.dataset.data_prefix.seg_map_path = self.val_seg_path
+        self.cfg.val_dataloader.dataset.data_prefix.img = self.val_dir
+        # self.cfg.val_dataloader.dataset.metainfo = self.cfg.metainfo
+        self.cfg.val_dataloader.dataset.type = "CocoDataset"
 
         self.cfg.test_dataloader = self.cfg.val_dataloader
+
+        # Modify metric config
+        self.cfg.val_evaluator.ann_file = (
+            self.cfg.data_root + "/" + self.cfg.val_ann_file
+        )
         self.cfg.test_evaluator = self.cfg.val_evaluator
 
         self.cfg.seed = self.seed
         self.cfg.train_cfg.val_interval = self.interval_steps
         self.cfg.default_hooks.checkpoint.interval = self.checkpoint_intervals
-        self.cfg.train_cfg.type = "EpochBasedTrainLoop"
-        del self.cfg.train_cfg.max_iters
         self.cfg.train_cfg.max_epochs = self.num_epochs
         self.cfg.train_dataloader.batch_size = self.batch_size
 
@@ -227,7 +235,6 @@ class ImgSegmentationMmseg(BaseTask):
         return checkpointing_modules
 
     def adapt_model(self):
-
         # build the runner from config
         if "runner_type" not in self.cfg:
             # build the default runner
@@ -238,22 +245,16 @@ class ImgSegmentationMmseg(BaseTask):
             runner = RUNNERS.build(self.cfg)
 
         model_type = self.model_name.lower()
+
         self.model = runner.model
         if self.local_model_path:
             self.model = prepare_mm_model_support(self.local_model_path, self.model)
             print(f"Model weights are loaded from : {self.local_model_path}")
         self.add_peft_modules(model_type)
-        # runner.cfg.activation_checkpointing = self.get_checkpointing_modules(self.model)
-
-        if self.gradient_checkpointing:
-            runner.cfg.activation_checkpointing = ["backbone"]
 
         runner.train()
         if self.eval_bool:
             runner.test()
-
-        self.save_peft_modules()
-
         if self.merge_adapter:
             try:
                 self.peft_model.unload_and_merge()
@@ -264,6 +265,9 @@ class ImgSegmentationMmseg(BaseTask):
                 )
 
         self.save_adapted_model()
+
+        torch.cuda.empty_cache()  # clears Adapter modules from GPU memory and frees up memory
+        self.logger.info("Model Adaptation Completed")
 
         torch.cuda.empty_cache()  # clears Adapter modules from GPU memory and frees up memory
         self.logger.info("Model Adaptation Completed")

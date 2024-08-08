@@ -15,6 +15,13 @@ from nyuntam_adapt.core.custom_model import (
 )
 from nyuntam_adapt.utils.task_utils import TimmModelConfig, ModelLoadingError
 from nyuntam_adapt.core.base_task import BaseTask
+from nyuntam_adapt.utils.task_utils import ModelLoadingError
+
+
+class ModelLoadingError(RuntimeError):
+    """Exception for custom model loading errors."""
+
+    pass
 
 
 # TODO Create Folder structure to be followed and suggest Augmentations based on heuristics and dataset

@@ -13,11 +13,13 @@ from datasets import load_dataset
 import logging
 from nyuntam_adapt.core.base_algorithm import BaseAlgorithm
 from nyuntam_adapt.core.dataset import Dataset
-from nyuntam_adapt.utils import (
-    get_peft_state_dict,
+from nyuntam_adapt.utils.algorithm_utils import get_peft_state_dict
+
+from nyuntam_adapt.utils.task_utils import (
     PEFT_TYPE_TO_MODEL_MAPPING,
     PEFT_TYPE_TO_CONFIG_MAPPING,
 )
+
 from nyuntam_adapt.trainers import AdaptSeq2SeqTrainer, AdaptSFTTrainer
 from nyuntam_adapt.core.base_trainer import BaseTrainer
 
@@ -301,7 +303,6 @@ class BaseTask(object):
         # Training
         if training_args.do_train:
             selected_trainer = self.task_trainer.get(self.task, BaseTrainer)
-            # self.logger.info("selected trainer : ", selected_trainer)
             trainer = selected_trainer(
                 model=model,
                 args=training_args,
