@@ -153,6 +153,41 @@ class FineTuningArgs:
 
 
 @dataclass
+class FSDPConfig:
+    fsdp_auto_wrap_policy: str = "TRANSFORMER_BASED_WRAP"
+    fsdp_backward_prefetch: str = "NO_PREFETCH"
+    fsdp_cpu_ram_efficient_loading: bool = True
+    fsdp_forward_prefetch: bool = False
+    fsdp_offload_params: bool = False
+    fsdp_sharding_strategy: str = "FULL_SHARD"
+    fsdp_state_dict_type: str = "SHARDED_STATE_DICT"
+    fsdp_sync_module_states: bool = True
+    fsdp_transformer_layer_cls_to_wrap: str = None
+    fsdp_use_orig_params: bool = True
+
+
+@dataclass
+class FSDPArgs:
+    compute_environment: str = "LOCAL_MACHINE"
+    debug: bool = True
+    distributed_type: str = "FSDP"
+    downcast_bf16: str = "no"
+    enable_cpu_affinity: bool = False
+    fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
+    machine_rank: int = 0
+    main_training_function: str = "main"
+    mixed_precision: str = "no"
+    num_machines: int = 1
+    num_processes: int = 2
+    rdzv_backend: str = "static"
+    same_network: bool = True
+    tpu_env: list = field(default_factory=list)
+    tpu_use_cluster: bool = False
+    tpu_use_sudo: bool = False
+    use_cpu: bool = False
+
+
+@dataclass
 class MmlabsArgs:
     amp: bool = False
     resume: bool = False
@@ -171,6 +206,7 @@ class MmlabsArgs:
     val_seg_file: str = "labels"
     class_list: list = None
     palette: list = None
+
 
 @dataclass
 class AdaptParams:
@@ -215,6 +251,7 @@ class AdaptParams:
     num_nodes: int = 1
     # FSDP args
     FSDP: bool = False
+    fsdp_args: FSDPArgs = field(default_factory=FSDPArgs)
 
 
 def create_instance(data_class, flat_dict):
