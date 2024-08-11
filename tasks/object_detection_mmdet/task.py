@@ -237,11 +237,11 @@ class ObjDetectionMmdet(BaseTask):
                         if str(file).split("/")[-1] in ["wds.pt", "wds.pth"]:
                             self.cfg.load_from = str(file)
                             self.logger.info(
-                                f"MODEL WEIGHTS WILL BE LOADED FROM {file}"
+                                f"Model weights will be loaded from {file}"
                             )
                 else:
                     self.cfg.load_from = str(file)
-                    self.logger.info(f"MODEL WEIGHTS WILL BE LOADED FROM {file}")
+                    self.logger.info(f"Model weights will be loaded from  {file}")
             except Exception as e:
                 raise CustomModelLoadError(
                     f"Could not set given model path as custom model weight path due to {e}"
