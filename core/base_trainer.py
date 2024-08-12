@@ -476,7 +476,7 @@ class BaseTrainer(Trainer):
                         state_dict, os.path.join(output_dir, "model.safetensors")
                     )
                 except:
-                    print("Could not save safetensors, hence skipping")
+                    self.logger.info("Could not save safetensors, hence skipping")
                     torch.save(state_dict, os.path.join(output_dir, "peft_modules.pt"))
             else:
                 torch.save(state_dict, os.path.join(output_dir, "peft_modules.pt"))

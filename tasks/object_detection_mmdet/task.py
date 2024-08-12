@@ -29,7 +29,6 @@ class ObjDetectionMmdet(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         setup_cache_size_limit_of_dynamo()
-        print(kwargs)
         args = kwargs["MMLABS_ARGS"]
         # load config
         self.logging_path = kwargs.get("LOGGING_PATH")
@@ -98,7 +97,6 @@ class ObjDetectionMmdet(BaseTask):
         model_info = get_model_info(
             "mmdet", shown_fields=["weight", "config", "model"], to_dict=True
         )
-        # config_key = MMdetection_Default_Model_mapping[model_name]
         config_key = config_file_name
 
         if osp.isfile(config_key):
@@ -277,11 +275,9 @@ class ObjDetectionMmdet(BaseTask):
         self.model = runner.model
         if self.local_model_path:
             self.model = prepare_mm_model_support(self.local_model_path, self.model)
-            print(f"Model weights are loaded from : {self.local_model_path}")
+            self.logger.info(f"Model weights are loaded from : {self.local_model_path}")
 
         self.add_peft_modules(model_type)
-        # runner.cfg.activation_checkpointing = self.get_checkpointing_modules(self.model)
-
         # TODO - Add an if statement for GRADIENT_CHECKPOINTING
         runner.cfg.activation_checkpointing = ["backbone", "neck"]
 

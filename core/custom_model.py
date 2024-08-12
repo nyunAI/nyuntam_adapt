@@ -13,6 +13,8 @@ from transformers import (
     AutoModelForImageClassification,
     DataCollatorForLanguageModeling,
 )
+import logging
+logger = logging.getLogger(__name__)
 
 ALLOWED_EXTENSIONS = {".pt", ".bin", ".pth"}
 
@@ -51,11 +53,11 @@ def prepare_timm_model_support(custom_model_path, model):
                         "wds.pt(h) not found in file path. Please ensure that your weight file is named as wds.pt/wds.pth."
                     )
             if isinstance(weights, torch.nn.Module):
-                print("Found a full model")
+                logger.info("Found a full model")
                 loaded_model = weights
                 return loaded_model
             elif isinstance(weights, OrderedDict):
-                print("Found a state dictionary.")
+                logger.info("Found a state dictionary.")
                 loaded_model = model.load_state_dict(weights)
                 return loaded_model
 
@@ -78,11 +80,11 @@ def prepare_mm_model_support(custom_model_path, model):
                         "wds.pt(h) not found in file path. Please ensure that your weight file is named as wds.pt/wds.pth."
                     )
             if isinstance(weights, OrderedDict):
-                print("Found a state_dict.")
+                logger.info("Found a state_dict.")
                 loaded_model = model.load_state_dict(weights)
                 return loaded_model
             elif isinstance(weights, torch.nn.Module):
-                print("Found a full model file.")
+                logger.info("Found a full model file.")
                 return weights
         else:
             raise FileNotFoundError(

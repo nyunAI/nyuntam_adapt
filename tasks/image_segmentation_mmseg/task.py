@@ -241,7 +241,7 @@ class ImgSegmentationMmseg(BaseTask):
         self.model = runner.model
         if self.local_model_path:
             self.model = prepare_mm_model_support(self.local_model_path, self.model)
-            print(f"Model weights are loaded from : {self.local_model_path}")
+            self.logger.info(f"Model weights are loaded from : {self.local_model_path}")
         self.add_peft_modules(model_type)
         # runner.cfg.activation_checkpointing = self.get_checkpointing_modules(self.model)
 
