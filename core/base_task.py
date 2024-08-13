@@ -23,8 +23,10 @@ from nyuntam_adapt.utils.task_utils import (
 from nyuntam_adapt.trainers import AdaptSeq2SeqTrainer, AdaptSFTTrainer
 from nyuntam_adapt.core.base_trainer import BaseTrainer
 
+from algorithm import AdaptionAlgorithm
 
-class BaseTask(object):
+
+class BaseTask(AdaptionAlgorithm):
     """Base Trainer class that defines the structure of each adaptation
     algorithm implemented in this library. Every new tasks is
     expected to directly use or overwrite the template functions defined below.
