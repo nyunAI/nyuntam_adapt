@@ -4,15 +4,19 @@ import torch.nn as nn
 from typing import Any
 from collections import deque
 from abc import abstractmethod
+import logging
 
 import bitsandbytes as bnb
-from peft.tuners.tuners_utils import BaseTuner
 
-from nyuntam_adapt.tasks.timm_image_classification import TimmforImageClassification
-from nyuntam_adapt.utils import get_submodules
+from mmdet.models.detectors.base import BaseDetector
+from mmdet.models.dense_heads.detr_head import DETRHead
+from mmdet.models.dense_heads.yolox_head import YOLOXHead
+from mmdet.models.dense_heads.rtmdet_head import RTMDetSepBNHead
+from mmseg.models.decode_heads.ham_head import LightHamHead
+from mmpose.models.heads.hybrid_heads.rtmo_head import RTMOHead
 
-sys.path.append("/workspace/Adapt/logging_adapt")
-import logging
+from nyuntam_adapt.tasks.image_classification_timm import TimmforImageClassification
+from nyuntam_adapt.utils.algorithm_utils import get_submodules
 
 
 class BaseAlgorithm(nn.Module):
@@ -139,7 +143,34 @@ class BaseAlgorithm(nn.Module):
         For Other models (LLM, TIMM) - It used the find classifier function to find the classifier layer
         """
         last_layer_list = []
-        if isinstance(model, TimmforImageClassification):
+        if hasattr(model, "bbox_head"):
+            # MMDET Models
+            detection_head_obj = getattr(model, "bbox_head")
+            if isinstance(detection_head_obj, (DETRHead, YOLOXHead, RTMDetSepBNHead)):
+
+                for name, p in model.bbox_head.named_modules():
+                    last_layer_list.append("bbox_head." + name)
+            else:
+                raise AttributeError(
+                    "Supported bbox_heads are : DETRHead, YOLOXHead, RTMDetSepBNHead"
+                )  # create custom exception name
+
+        # For SEGNEXT
+        elif hasattr(model, "decode_head"):
+            seg_head_obj = getattr(model, "decode_head")
+            if isinstance(seg_head_obj, LightHamHead):
+                for name, p in model.decode_head.named_modules():
+                    last_layer_list.append("decode_head." + name)
+
+        # For MMPOSE RTMO MODEL
+        elif hasattr(model, "head"):
+            pose_det_obj = getattr(model, "head")
+            final_layer = getattr(model.head, "dcc")
+            if isinstance(pose_det_obj, RTMOHead):
+                for name, p in model.head.named_modules():
+                    last_layer_list.append("head." + name)
+
+        elif isinstance(model, TimmforImageClassification):
             self.config = getattr(self, "config", None)
             classifier_obj = self.find_classifier(model, self.config)
             last_layer_list.append(classifier_obj)
@@ -154,6 +185,36 @@ class BaseAlgorithm(nn.Module):
         return last_layer_list
 
     def unfreeze_last_layer(self, model, config):
+        if hasattr(model, "bbox_head"):
+
+            detection_head_obj = getattr(model, "bbox_head")
+            if isinstance(detection_head_obj, (DETRHead, YOLOXHead, RTMDetSepBNHead)):
+
+                for name, p in model.bbox_head.named_parameters():
+                    p.requires_grad = True
+                    self.logger.info(f"Unfreezed {name}")
+            else:
+
+                raise AttributeError(
+                    "Supported bbox_heads are: DETRHead, YOLOXHead, RTMDetSepBNHead"
+                )  # create custom exception name
+            return
+        if hasattr(model, "decode_head"):
+            seg_head_obj = getattr(model, "decode_head")
+            if isinstance(seg_head_obj, LightHamHead):
+                for name, p in model.decode_head.named_parameters():
+                    p.requires_grad = True
+                    self.logger.info(f"Unfreezed {name}")
+            return
+
+        # For MMPOSE RTMO MODEL
+        if hasattr(model, "head"):
+            pose_det_obj = getattr(model, "head")
+            if isinstance(pose_det_obj, RTMOHead):
+                for name, p in model.head.named_parameters():
+                    p.requires_grad = True
+                    self.logger.info(f"Unfreezed {name}")
+            return
 
         if isinstance(model, TimmforImageClassification):
             classifier_obj = self.find_classifier(model, config)
@@ -172,6 +233,9 @@ class BaseAlgorithm(nn.Module):
     def find_classifier(self, model, config=None):
         if isinstance(model, TimmforImageClassification):
             model = model.model_timm
+
+        if isinstance(model, BaseDetector):
+            return None
 
         last_layer = [
             "head",

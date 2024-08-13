@@ -47,10 +47,8 @@ from transformers.utils import (
 )
 from safetensors.torch import save_file as safe_save_file
 
-sys.path.append("/workspace/Adapt/logging_adapt")
 import logging
-
-from nyuntam_adapt.utils import get_peft_state_dict
+from nyuntam_adapt.utils.algorithm_utils import get_peft_state_dict
 
 
 DEFAULT_CALLBACKS = [DefaultFlowCallback]
@@ -59,18 +57,6 @@ TRAINING_ARGS_NAME = "training_args.bin"
 
 if is_safetensors_available():
     import safetensors.torch
-# if is_sagemaker_mp_enabled():
-#     import smdistributed.modelparallel.torch as smp
-#     from smdistributed.modelparallel import __version__ as SMP_VERSION
-
-#     IS_SAGEMAKER_MP_POST_1_10 = version.parse(SMP_VERSION) >= version.parse("1.10")
-
-#     from transformers.trainer_pt_utils import smp_forward_backward, smp_forward_only, smp_gather, smp_nested_concat
-# else:
-#     IS_SAGEMAKER_MP_POST_1_10 = False
-
-# logger = logging.get_logger(__name__)
-
 
 class BaseTrainer(Trainer):
     def __init__(
@@ -490,7 +476,7 @@ class BaseTrainer(Trainer):
                         state_dict, os.path.join(output_dir, "model.safetensors")
                     )
                 except:
-                    print("Could not save safetensors, hence skipping")
+                    self.logger.info("Could not save safetensors, hence skipping")
                     torch.save(state_dict, os.path.join(output_dir, "peft_modules.pt"))
             else:
                 torch.save(state_dict, os.path.join(output_dir, "peft_modules.pt"))

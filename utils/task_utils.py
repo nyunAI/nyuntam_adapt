@@ -18,6 +18,26 @@ from nyuntam_adapt.algorithms.SSF import SSFModel, SSFConfig
 from nyuntam_adapt.algorithms.LoRA_PEFT import LoraModel_PEFT
 from nyuntam_adapt.algorithms.LoRA_PEFT.config import LoraConfig_PEFT
 
+
+MMDETECTION_DEFAULT_MODEL_WEIGHT_MAPPING = {
+    "co_dino_5scale_r50_8xb2_1x_coco": "https://download.openmmlab.com/mmdetection/v3.0/codetr/co_dino_5scale_r50_1x_coco-7481f903.pth",
+    "align_detr-4scale_r50_8xb2-12e_coco": "https://download.openmmlab.com/mmdetection/v3.0/align_detr/align_detr-4scale_r50_8xb2-12e_coco/align_detr-4scale_r50_8xb2-12e_coco_20230914_095734-61f921af.pth",
+}
+
+
+MMSEGMENTATION_DEFAULT_MODEL_MAPPING = {
+    "segnext": "segnext_mscan-t_1xb16-adamw-160k_ade20k-512x512",
+    "unet": "unet_s5-d16_deeplabv3_4xb4-40k_chase-db1-128x128",
+}
+
+
+MMPOSE_DEFAULT_MODEL_MAPPING = {
+    "rtmo": "rtmo-l_16xb16-600e_coco-640x640",
+    "hrnet": "td-hm_hrnet-w32_8xb64-210e_coco-256x192",
+    "rtmopose": "rtmpose-m_8xb64-210e_ap10k-256x256",
+}
+
+
 PEFT_TYPE_TO_MODEL_MAPPING = {
     "LoRA": LoraModel_PEFT,
     "SSF": SSFModel,

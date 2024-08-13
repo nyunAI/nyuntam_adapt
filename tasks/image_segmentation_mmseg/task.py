@@ -14,7 +14,7 @@ from mim.utils import download_from_file
 from .custom_dataset import CustomDataset
 from nyuntam_adapt.core.base_task import BaseTask
 from nyuntam_adapt.utils.task_utils import MMSEGMENTATION_DEFAULT_MODEL_MAPPING
-from nyuntam_adapt.tasks.custom_model import (
+from nyuntam_adapt.core.custom_model import (
     prepare_mm_model_support,
     CustomModelLoadError,
 )
@@ -207,11 +207,11 @@ class ImgSegmentationMmseg(BaseTask):
                         if str(file).split("/")[-1] in ["wds.pt", "wds.pth"]:
                             self.cfg.load_from = str(file)
                             self.logger.info(
-                                f"MODEL WEIGHTS WILL BE LOADED FROM {file}"
+                                f"Model weights will be loaded from  {file}"
                             )
                 else:
                     self.cfg.load_from = str(file)
-                    self.logger.info(f"MODEL WEIGHTS WILL BE LOADED FROM {file}")
+                    self.logger.info(f"Model weights will be loaded from {file}")
             except Exception as e:
                 raise CustomModelLoadError(
                     f"Could not set given model path as custom model weight path due to {e}"
@@ -241,7 +241,7 @@ class ImgSegmentationMmseg(BaseTask):
         self.model = runner.model
         if self.local_model_path:
             self.model = prepare_mm_model_support(self.local_model_path, self.model)
-            print(f"Model weights are loaded from : {self.local_model_path}")
+            self.logger.info(f"Model weights are loaded from : {self.local_model_path}")
         self.add_peft_modules(model_type)
         # runner.cfg.activation_checkpointing = self.get_checkpointing_modules(self.model)
 

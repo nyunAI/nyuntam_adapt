@@ -11,10 +11,17 @@ from nyuntam_adapt.tasks.image_classification_timm import TimmforImageClassifica
 from nyuntam_adapt.core.custom_model import (
     prepare_custom_image_model_support,
     prepare_timm_model_support,
-    CustomModelLoadError
+    CustomModelLoadError,
 )
 from nyuntam_adapt.utils.task_utils import TimmModelConfig, ModelLoadingError
 from nyuntam_adapt.core.base_task import BaseTask
+from nyuntam_adapt.utils.task_utils import ModelLoadingError
+
+
+class ModelLoadingError(RuntimeError):
+    """Exception for custom model loading errors."""
+
+    pass
 
 
 # TODO Create Folder structure to be followed and suggest Augmentations based on heuristics and dataset

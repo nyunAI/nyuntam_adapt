@@ -153,6 +153,62 @@ class FineTuningArgs:
 
 
 @dataclass
+class FSDPConfig:
+    fsdp_auto_wrap_policy: str = "TRANSFORMER_BASED_WRAP"
+    fsdp_backward_prefetch: str = "NO_PREFETCH"
+    fsdp_cpu_ram_efficient_loading: bool = True
+    fsdp_forward_prefetch: bool = False
+    fsdp_offload_params: bool = False
+    fsdp_sharding_strategy: str = "FULL_SHARD"
+    fsdp_state_dict_type: str = "SHARDED_STATE_DICT"
+    fsdp_sync_module_states: bool = True
+    fsdp_transformer_layer_cls_to_wrap: str = None
+    fsdp_use_orig_params: bool = True
+
+
+@dataclass
+class FSDPArgs:
+    compute_environment: str = "LOCAL_MACHINE"
+    debug: bool = True
+    distributed_type: str = "FSDP"
+    downcast_bf16: str = "no"
+    enable_cpu_affinity: bool = False
+    fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
+    machine_rank: int = 0
+    main_training_function: str = "main"
+    mixed_precision: str = "no"
+    num_machines: int = 1
+    num_processes: int = 2
+    rdzv_backend: str = "static"
+    same_network: bool = True
+    tpu_env: list = field(default_factory=list)
+    tpu_use_cluster: bool = False
+    tpu_use_sudo: bool = False
+    use_cpu: bool = False
+
+
+@dataclass
+class MmlabsArgs:
+    amp: bool = False
+    resume: bool = False
+    auto_scale_lr: bool = False
+    cfg_options: str = None
+    launcher: str = None
+    dest_root: str = "/workspace/nyuntam/user_data/jobs/Adapt/mmdet_cache"
+    train_ann_file: str = "_annotations.coco.json"
+    val_ann_file: str = "_annotations.coco.json"
+    work_dir: str = "/workspace/nyuntam/user_data/jobs/Adapt/results/mmdet"
+    num_classes: int = 5
+    checkpoint_interval: int = 5
+    train_img_file: str = "images"
+    train_seg_file: str = "labels"
+    val_img_file: str = "images"
+    val_seg_file: str = "labels"
+    class_list: list = None
+    palette: list = None
+
+
+@dataclass
 class AdaptParams:
     TASK: str = "text_generation"
     subtask: str = None
@@ -163,9 +219,9 @@ class AdaptParams:
     blocksize: int = 128
     cuda_id: str = "0"
     auto_select_modules: bool = True
-    OUTPUT_DIR: str = "abc/jobs/1/"
+    OUTPUT_DIR: str = "/workspace/nyuntam/user_data/jobs/Adapt/1/"
     OVERWRITE_OUTPUT_DIR: bool = False
-    LOGGING_PATH: str = "abc/logs/1/log.log"
+    LOGGING_PATH: str = "/workspace/nyuntam/user_data/logs/Adapt/1/log.log"
     MERGE_ADAPTERS: bool = False
     DATASET_ARGS: DatasetConfig = field(default_factory=DatasetConfig)
     MODEL_ARGS: ModelArgs = field(default_factory=ModelArgs)
@@ -176,6 +232,7 @@ class AdaptParams:
     SSF_CONFIG: SSFConfig = field(default_factory=SSFConfig)
     LoRA_CONFIG: LoRA_PEFT = field(default_factory=LoRA_PEFT)
     BNB_CONFIG: BNBConfig = field(default_factory=BNBConfig)
+    MMLABS_ARGS: MmlabsArgs = field(default_factory=MmlabsArgs)
     SAVE_METHOD: str = "state_dict"
     # Seq2Seq specific arguments
     max_input_length: int = 128
@@ -194,6 +251,7 @@ class AdaptParams:
     num_nodes: int = 1
     # FSDP args
     FSDP: bool = False
+    fsdp_args: FSDPArgs = field(default_factory=FSDPArgs)
 
 
 def create_instance(data_class, flat_dict):

@@ -13,11 +13,13 @@ from datasets import load_dataset
 import logging
 from nyuntam_adapt.core.base_algorithm import BaseAlgorithm
 from nyuntam_adapt.core.dataset import Dataset
-from nyuntam_adapt.utils import (
-    get_peft_state_dict,
+from nyuntam_adapt.utils.algorithm_utils import get_peft_state_dict
+
+from nyuntam_adapt.utils.task_utils import (
     PEFT_TYPE_TO_MODEL_MAPPING,
     PEFT_TYPE_TO_CONFIG_MAPPING,
 )
+
 from nyuntam_adapt.trainers import AdaptSeq2SeqTrainer, AdaptSFTTrainer
 from nyuntam_adapt.core.base_trainer import BaseTrainer
 
@@ -301,7 +303,6 @@ class BaseTask(object):
         # Training
         if training_args.do_train:
             selected_trainer = self.task_trainer.get(self.task, BaseTrainer)
-            # self.logger.info("selected trainer : ", selected_trainer)
             trainer = selected_trainer(
                 model=model,
                 args=training_args,
@@ -490,12 +491,12 @@ class BaseTask(object):
         }
 
         if SAVE_MAP[self.save_method]():
-            print(f"MODEL SAVED USING : {self.save_method}")
+            self.logger.info(f"MODEL SAVED USING : {self.save_method}")
             return True
         else:
             for method in SAVE_MAP.values():
                 if method():
-                    print(f"MODEL SAVED USING : {method}")
+                    self.logger.info(f"MODEL SAVED USING : {method}")
                     return True
 
         return False
@@ -547,7 +548,6 @@ class BaseTask(object):
                         state_dict,
                         os.path.join(self.output_dir, "model_state_dict.safetensors"),
                     )
-                    print(type(os.getenv("LOCAL_RANK")), os.getenv("LOCAL_RANK"))
                     if os.getenv("LOCAL_RANK") == "0":
                         from safetensors import safe_open
 
@@ -576,7 +576,7 @@ class BaseTask(object):
                             if ("lora" in k) or ("ssf" in k):
                                 new_sd[k] = tensors[k]
                         self.peft_model.load_state_dict(new_sd)
-                        print(self.peft_model.device)
+                        self.logger.info(self.peft_model.device)
                         self.peft_model.unload_and_merge()
                         self.logger.info(" FSDP PEFT modules merging done.")
                     elif os.getenv("LOCAL_RANK") == "1":
