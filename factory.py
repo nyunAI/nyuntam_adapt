@@ -23,7 +23,7 @@ class AdaptFactory(BaseFactory):
         task = kw.get("TASK", "text_generation")
         subtask = kw.get("subtask", None)
         self._algorithm_class = self.get_task(task, subtask)
-        super().__pre_init__(kwargs)
+        super().__pre_init__(*args, **kwargs)
 
     def __init__(self, kwargs):
         super().__init__(kwargs)
