@@ -44,3 +44,5 @@ def export_task_modules(task, subtask=None):
         from nyuntam_adapt.tasks.pose_estimation_mmpose import PoseEstimationMmpose
 
         return PoseEstimationMmpose
+    else:
+        raise ValueError(f"Task {task} is not supported")
