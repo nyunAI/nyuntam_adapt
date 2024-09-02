@@ -246,7 +246,112 @@ python main.py --yaml_path {path to the yaml file}
 
 This command runs the main file with the configuration setup in the yaml file.
 
+## Acknowledgments and Citations
 
+This repository utilizes various state-of-the-art methods and algorithms developed by the research community. We acknowledge the following works that have contributed to the development and performance of the Nyuntam Text Generation module:
 
+- [**LoRA: Low-Rank Adaptation of Large Language Models**](https://arxiv.org/abs/2106.09685)  
+  *Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, Weizhu Chen.* arXiv preprint, 2021.
+  ```bibtex
+  @misc{hu2021loralowrankadaptationlarge,
+      title={LoRA: Low-Rank Adaptation of Large Language Models},
+      author={Edward J. Hu and Yelong Shen and Phillip Wallis and Zeyuan Allen-Zhu and Yuanzhi Li and Shean Wang and Lu Wang and Weizhu Chen},
+      year={2021},
+      eprint={2106.09685},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2106.09685},
+  }
+  ```
 
+- [**DoRA: Weight-Decomposed Low-Rank Adaptation**](https://arxiv.org/abs/2402.09353)  
+  *Shih-Yang Liu, Chien-Yi Wang, Hongxu Yin, Pavlo Molchanov, Yu-Chiang Frank Wang, Kwang-Ting Cheng, Min-Hung Chen.* arXiv preprint, 2024.
+  ```bibtex
+  @misc{liu2024doraweightdecomposedlowrankadaptation,
+      title={DoRA: Weight-Decomposed Low-Rank Adaptation},
+      author={Shih-Yang Liu and Chien-Yi Wang and Hongxu Yin and Pavlo Molchanov and Yu-Chiang Frank Wang and Kwang-Ting Cheng and Min-Hung Chen},
+      year={2024},
+      eprint={2402.09353},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2402.09353},
+  }
+  ```
 
+- [**Scaling & Shifting Your Features: A New Baseline for Efficient Model Tuning**](https://arxiv.org/abs/2210.08823)  
+  *Dongze Lian, Daquan Zhou, Jiashi Feng, Xinchao Wang.* arXiv preprint, 2023.
+  ```bibtex
+  @misc{lian2023scalingshiftingfeatures,
+      title={Scaling & Shifting Your Features: A New Baseline for Efficient Model Tuning},
+      author={Dongze Lian and Daquan Zhou and Jiashi Feng and Xinchao Wang},
+      year={2023},
+      eprint={2210.08823},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2210.08823},
+  }
+  ```
+
+- [**QLoRA: Efficient Finetuning of Quantized LLMs**](https://arxiv.org/abs/2305.14314)  
+  *Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, Luke Zettlemoyer.* arXiv preprint, 2023.
+  ```bibtex
+  @misc{dettmers2023qloraefficientfinetuningquantized,
+      title={QLoRA: Efficient Finetuning of Quantized LLMs},
+      author={Tim Dettmers and Artidoro Pagnoni and Ari Holtzman and Luke Zettlemoyer},
+      year={2023},
+      eprint={2305.14314},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2305.14314},
+  }
+  ```
+
+- [**PyTorch FSDP: Experiences on Scaling Fully Sharded Data Parallel**](https://arxiv.org/abs/2304.11277)  
+  *Yanli Zhao, Andrew Gu, Rohan Varma, Liang Luo, Chien-Chin Huang, Min Xu, Less Wright, Hamid Shojanazeri, Myle Ott, Sam Shleifer, Alban Desmaison, Can Balioglu, Pritam Damania, Bernard Nguyen, Geeta Chauhan, Yuchen Hao, Ajit Mathews, Shen Li.* arXiv preprint, 2023.
+  ```bibtex
+  @misc{zhao2023pytorchfsdpexperiencesscaling,
+      title={PyTorch FSDP: Experiences on Scaling Fully Sharded Data Parallel},
+      author={Yanli Zhao and Andrew Gu and Rohan Varma and Liang Luo and Chien-Chin Huang and Min Xu and Less Wright and Hamid Shojanazeri and Myle Ott and Sam Shleifer and Alban Desmaison and Can Balioglu and Pritam Damania and Bernard Nguyen and Geeta Chauhan and Yuchen Hao and Ajit Mathews and Shen Li},
+      year={2023},
+      eprint={2304.11277},
+      archivePrefix={arXiv},
+      primaryClass={cs.DC},
+      url={https://arxiv.org/abs/2304.11277},
+  }
+  ```
+
+- [**PyTorch Distributed: Experiences on Accelerating Data Parallel Training**](https://arxiv.org/abs/2006.15704)  
+  *Shen Li, Yanli Zhao, Rohan Varma, Omkar Salpekar, Pieter Noordhuis, Teng Li, Adam Paszke, Jeff Smith, Brian Vaughan, Pritam Damania, Soumith Chintala.* arXiv preprint, 2020.
+  ```bibtex
+  @misc{li2020pytorchdistributedexperiencesaccelerating,
+      title={PyTorch Distributed: Experiences on Accelerating Data Parallel Training},
+      author={Shen Li and Yanli Zhao and Rohan Varma and Omkar Salpekar and Pieter Noordhuis and Teng Li and Adam Paszke and Jeff Smith and Brian Vaughan and Pritam Damania and Soumith Chintala},
+      year={2020},
+      eprint={2006.15704},
+      archivePrefix={arXiv},
+      primaryClass={cs.DC},
+      url={https://arxiv.org/abs/2006.15704},
+  }
+  ```
+
+- [**Accelerate: Training and inference at scale made simple, efficient and adaptable**](https://github.com/huggingface/accelerate)  
+  *Sylvain Gugger, Lysandre Debut, Thomas Wolf, Philipp Schmid, Zachary Mueller, Sourab Mangrulkar, Marc Sun, Benjamin Bossan.* 2022.
+  ```bibtex
+  @Misc{accelerate,
+      title = {Accelerate: Training and inference at scale made simple, efficient and adaptable.},
+      author = {Sylvain Gugger and Lysandre Debut and Thomas Wolf and Philipp Schmid and Zachary Mueller and Sourab Mangrulkar and Marc Sun and Benjamin Bossan},
+      howpublished = {\url{https://github.com/huggingface/accelerate}},
+      year = {2022}
+  }
+  ```
+
+- [**PEFT: State-of-the-art Parameter-Efficient Fine-Tuning methods**](https://github.com/huggingface/peft)  
+  *Sourab Mangrulkar, Sylvain Gugger, Lysandre Debut, Younes Belkada, Sayak Paul, Benjamin Bossan.* 2022.
+  ```bibtex
+  @Misc{peft,
+      title = {PEFT: State-of-the-art Parameter-Efficient Fine-Tuning methods},
+      author = {Sourab Mangrulkar and Sylvain Gugger and Lysandre Debut and Younes Belkada and Sayak Paul and Benjamin Bossan},
+      howpublished = {\url{https://github.com/huggingface/peft}},
+      year = {2022}
+  }
+  ```
