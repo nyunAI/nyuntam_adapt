@@ -7,15 +7,6 @@ from abc import abstractmethod
 import logging
 
 import bitsandbytes as bnb
-
-from mmdet.models.detectors.base import BaseDetector
-from mmdet.models.dense_heads.detr_head import DETRHead
-from mmdet.models.dense_heads.yolox_head import YOLOXHead
-from mmdet.models.dense_heads.rtmdet_head import RTMDetSepBNHead
-from mmseg.models.decode_heads.ham_head import LightHamHead
-from mmpose.models.heads.hybrid_heads.rtmo_head import RTMOHead
-
-from nyuntam_adapt.tasks.image_classification_timm import TimmforImageClassification
 from nyuntam_adapt.utils.algorithm_utils import get_submodules
 
 
@@ -142,6 +133,15 @@ class BaseAlgorithm(nn.Module):
         RTMO - It returns the modules in head
         For Other models (LLM, TIMM) - It used the find classifier function to find the classifier layer
         """
+        from mmdet.models.dense_heads.detr_head import DETRHead
+        from mmdet.models.dense_heads.yolox_head import YOLOXHead
+        from mmdet.models.dense_heads.rtmdet_head import RTMDetSepBNHead
+        from mmseg.models.decode_heads.ham_head import LightHamHead
+        from mmpose.models.heads.hybrid_heads.rtmo_head import RTMOHead
+        from nyuntam_adapt.tasks.image_classification_timm import (
+            TimmforImageClassification,
+        )
+
         last_layer_list = []
         if hasattr(model, "bbox_head"):
             # MMDET Models
@@ -186,6 +186,9 @@ class BaseAlgorithm(nn.Module):
 
     def unfreeze_last_layer(self, model, config):
         if hasattr(model, "bbox_head"):
+            from mmdet.models.dense_heads.detr_head import DETRHead
+            from mmdet.models.dense_heads.yolox_head import YOLOXHead
+            from mmdet.models.dense_heads.rtmdet_head import RTMDetSepBNHead
 
             detection_head_obj = getattr(model, "bbox_head")
             if isinstance(detection_head_obj, (DETRHead, YOLOXHead, RTMDetSepBNHead)):
@@ -200,6 +203,9 @@ class BaseAlgorithm(nn.Module):
                 )  # create custom exception name
             return
         if hasattr(model, "decode_head"):
+            from mmseg.models.decode_heads.ham_head import LightHamHead
+            from mmpose.models.heads.hybrid_heads.rtmo_head import RTMOHead
+
             seg_head_obj = getattr(model, "decode_head")
             if isinstance(seg_head_obj, LightHamHead):
                 for name, p in model.decode_head.named_parameters():
@@ -215,6 +221,9 @@ class BaseAlgorithm(nn.Module):
                     p.requires_grad = True
                     self.logger.info(f"Unfreezed {name}")
             return
+        from nyuntam_adapt.tasks.image_classification_timm import (
+            TimmforImageClassification,
+        )
 
         if isinstance(model, TimmforImageClassification):
             classifier_obj = self.find_classifier(model, config)
@@ -231,6 +240,11 @@ class BaseAlgorithm(nn.Module):
         self.logger.info(f"Unfreezed {classifier_obj}")
 
     def find_classifier(self, model, config=None):
+        from mmdet.models.detectors.base import BaseDetector
+        from nyuntam_adapt.tasks.image_classification_timm import (
+            TimmforImageClassification,
+        )
+
         if isinstance(model, TimmforImageClassification):
             model = model.model_timm
 
